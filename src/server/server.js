@@ -1,52 +1,112 @@
 import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import db from '../config/db.js';
-import mysql from 'mysql2/promise';
-const app = express();
-app.use(cors());
-app.use(express.json());
 
 dotenv.config();
 
-app.get('/health', async (req, res) => {
-  try {
-    const connection = await mysql.createConnection({
-        host: process.env.DB_HOST || 'localhost',
-        port: parseInt(process.env.DB_PORT) || 1433,
-        database: process.env.DB_NAME || 'padrao',
-        user: process.env.DB_USER || 'sa',
-        password: process.env.DB_PASSWORD || ''
-      });
-      console.log(connection);
-    const [rows] = await connection.execute(`SELECT * FROM Academias`);
-    await connection.end();
+const app = express();
+app.use(helmet());
+app.use(cors());
+app.use(express.json());
 
-    res.json({
-      status: 'OK ✅',
-      db: 'CONECTADO ✅',
-      conexoes: 'Pool funcionando',
-      timestamp: new Date().toISOString(),
-      resultado_query: rows[0]
-    });
-  } catch (error) {
-    res.status(500).json({
-      status: 'ERRO ❌',
-      db: 'FALHOU ❌',
-      erro: error.message,
-      resultado_query: {
-        host: process.env.DB_HOST || 'localhost',
-        port: parseInt(process.env.DB_PORT) || 1433,
-        database: process.env.DB_NAME || 'padrao',
-        user: process.env.DB_USER || 'sa',
-        password: process.env.DB_PASSWORD || ''
-      },
-    });
-  }
-});
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`🚀 http://localhost:${PORT}`);
-  console.log(`🧪 Teste: http://localhost:${PORT}/health`);
-});
+// Função para iniciar o servidor
+const startServer = async () => {
+    try {
+        // Conecta ao SQL Server ANTES de iniciar as rotas
+        await db.connect();
+        
+        // Rota de health check
+        app.get('/health', async (req, res) => {
+            try {
+                // Usando sintaxe SQL Server (TOP ao invés de LIMIT)
+                const rows = await db.query('SELECT TOP 1 * FROM Academias');
+                
+                res.json({
+                    status: 'OK ✅',
+                    database: 'CONECTADO ✅',
+                    sqlServer: 'Funcionando',
+                    timestamp: new Date().toISOString(),
+                    recordCount: rows.length,
+                    sample: rows[0] || null
+                });
+            } catch (error) {
+                console.error('Erro no health check:', error.message);
+                
+                res.status(500).json({
+                    status: 'ERRO ❌',
+                    database: 'FALHOU ❌',
+                    message: 'Erro ao conectar com o banco de dados',
+                    timestamp: new Date().toISOString()
+                });
+            }
+        });
+        
+        // Rota raiz
+        app.get('/', (req, res) => {
+            res.json({
+                message: 'API SQL Server funcionando',
+                version: '1.0.0',
+                database: 'SQL Server',
+                endpoints: {
+                    health: '/health',
+                    academias: '/academias'
+                }
+            });
+        });
+        
+        // Exemplo de rota para listar academias
+        app.get('/academias', async (req, res) => {
+            try {
+                const academias = await db.query('SELECT * FROM Academias');
+                res.json({
+                    success: true,
+                    count: academias.length,
+                    data: academias
+                });
+            } catch (error) {
+                console.error('Erro ao buscar academias:', error.message);
+                res.status(500).json({
+                    success: false,
+                    message: 'Erro ao buscar academias'
+                });
+            }
+        });
+        
+        // Tratamento de erros global
+        app.use((err, req, res, next) => {
+            console.error('Erro não tratado:', err);
+            res.status(500).json({
+                status: 'error',
+                message: 'Erro interno do servidor'
+            });
+        });
+        
+        // Iniciar servidor HTTP
+        const PORT = process.env.PORT || 3001;
+        app.listen(PORT, () => {
+            console.log('\n🚀 Servidor rodando com sucesso!');
+            console.log(`   URL: http://localhost:${PORT}`);
+            console.log(`   Health: http://localhost:${PORT}/health`);
+            console.log(`   Academias: http://localhost:${PORT}/academias`);
+            console.log(`   Ambiente: ${process.env.NODE_ENV || 'development'}\n`);
+        });
+        
+    } catch (error) {
+        console.error('\n❌ FALHA AO INICIAR SERVIDOR:');
+        console.error(`   ${error.message}\n`);
+        console.error('💡 Verifique:');
+        console.error('   1. SQL Server está rodando?');
+        console.error('   2. Credenciais no .env estão corretas?');
+        console.error('   3. Banco de dados existe?');
+        console.error('   4. Usuário tem permissão?\n');
+        process.exit(1);
+    }
+};
+
+// Iniciar
+startServer();
+
+export default app;

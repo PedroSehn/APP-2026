@@ -1,0 +1,76 @@
+REATE TABLE Academias (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    nome NVARCHAR(100) NOT NULL UNIQUE,
+    cnpj NVARCHAR(18) NOT NULL UNIQUE,
+    created_at DATETIME2 DEFAULT GETDATE()
+);
+
+CREATE TABLE Usuarios (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    academia_id INT NULL,
+    nome NVARCHAR(100) NOT NULL,
+    email NVARCHAR(100) NOT NULL UNIQUE,
+    password_hash NVARCHAR(255) NOT NULL,
+    role NVARCHAR(20) NOT NULL,
+    created_at DATETIME2 DEFAULT GETDATE(),
+    FOREIGN KEY (academia_id) REFERENCES Academias(id)
+);
+
+CREATE TABLE Planos (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    academia_id INT NULL,
+    nome NVARCHAR(100) NOT NULL,
+    valor DECIMAL(10,2) NOT NULL,
+    descricao NVARCHAR(255) NULL,
+    FOREIGN KEY (academia_id) REFERENCES Academias(id)
+);
+
+CREATE TABLE Aulas (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    academia_id INT NULL,
+    nome NVARCHAR(100) NOT NULL,
+    descricao NVARCHAR(255) NULL,
+    FOREIGN KEY (academia_id) REFERENCES Academias(id)
+);
+
+CREATE TABLE Horarios (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    aula_id INT NULL,
+    instrutor_id INT NULL,
+    dia_semana INT NOT NULL,
+    hora_inicio TIME NOT NULL,
+    hora_fim TIME NOT NULL,
+    capacidade_maxima INT DEFAULT 20,
+    FOREIGN KEY (aula_id) REFERENCES Aulas(id),
+    FOREIGN KEY (instrutor_id) REFERENCES Usuarios(id)
+);
+
+CREATE TABLE Assinaturas (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    aluno_id INT NOT NULL,
+    plano_id INT NOT NULL,
+    data_inicio DATETIME2 NOT NULL,
+    status NVARCHAR(20) NOT NULL,
+    FOREIGN KEY (aluno_id) REFERENCES Usuarios(id),
+    FOREIGN KEY (plano_id) REFERENCES Planos(id)
+);
+
+CREATE TABLE Faturas (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    assinatura_id INT NOT NULL,
+    valor DECIMAL(10,2) NOT NULL,
+    data_vencimento DATE NOT NULL,
+    data_pagamento DATE NULL,
+    status NVARCHAR(20) NOT NULL,
+    FOREIGN KEY (assinatura_id) REFERENCES Assinaturas(id)
+);
+
+CREATE TABLE Presencas (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    aluno_id INT NOT NULL,
+    horario_id INT NOT NULL,
+    data_aula DATE NOT NULL,
+    status NVARCHAR(20) NOT NULL,
+    FOREIGN KEY (aluno_id) REFERENCES Usuarios(id),
+    FOREIGN KEY (horario_id) REFERENCES Horarios(id)
+);

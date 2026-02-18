@@ -1,4 +1,10 @@
-REATE TABLE Academias (
+CREATE DATABASE academias_gestao 
+    CHARACTER SET utf8mb4 
+    COLLATE utf8mb4_unicode_ci;
+
+USE academias_gestao;
+
+CREATE TABLE Academias (
     id INT IDENTITY(1,1) PRIMARY KEY,
     nome NVARCHAR(100) NOT NULL UNIQUE,
     cnpj NVARCHAR(18) NOT NULL UNIQUE,

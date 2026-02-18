@@ -3,6 +3,9 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import db from '../config/db.js';
+import authRouter from '../routes/auth.js';
+import academiasRouter from '../routes/academias.js';
+import { authenticate } from '../middleware/auth.js';
 
 dotenv.config();
 
@@ -10,6 +13,8 @@ const app = express();
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
+app.use('/auth', authRouter);
+app.use('/academias', authenticate, academiasRouter);
 
 
 // Função para iniciar o servidor
@@ -57,23 +62,6 @@ const startServer = async () => {
             });
         });
         
-        // Exemplo de rota para listar academias
-        app.get('/academias', async (req, res) => {
-            try {
-                const academias = await db.query('SELECT * FROM Academias');
-                res.json({
-                    success: true,
-                    count: academias.length,
-                    data: academias
-                });
-            } catch (error) {
-                console.error('Erro ao buscar academias:', error.message);
-                res.status(500).json({
-                    success: false,
-                    message: 'Erro ao buscar academias'
-                });
-            }
-        });
         
         // Tratamento de erros global
         app.use((err, req, res, next) => {

@@ -8,6 +8,7 @@ import jwt from 'jsonwebtoken';
 
 import app from '../../src/server/server.js';
 import userService from '../../src/services/userService.js';
+import refreshTokenService from '../../src/services/refreshTokenService.js';
 
 describe('Auth routes', () => {
     afterEach(() => {
@@ -24,6 +25,9 @@ describe('Auth routes', () => {
 
     it('allows a user to log in with valid credentials', async () => {
         sinon.stub(userService, 'authenticateUser').resolves(fakeUser);
+        sinon
+            .stub(refreshTokenService, 'createRefreshToken')
+            .resolves({ token: 'refresh-token', expiresAt: new Date().toISOString(), expiresInDays: 14 });
 
         const response = await request(app)
             .post('/auth/login')
@@ -32,6 +36,8 @@ describe('Auth routes', () => {
         expect(response.status).to.equal(200);
         expect(response.body).to.have.property('token').that.is.a('string');
         expect(response.body).to.have.property('expiresIn');
+        expect(response.body).to.have.property('refreshToken', 'refresh-token');
+        expect(response.body).to.have.property('refreshTokenExpiresInDays', 14);
         expect(response.body.user).to.deep.equal(fakeUser);
 
         const payload = jwt.verify(response.body.token, process.env.JWT_SECRET);
@@ -54,6 +60,9 @@ describe('Auth routes', () => {
 
     it('creates a user and returns a JWT on register', async () => {
         sinon.stub(userService, 'createUser').resolves(fakeUser);
+        sinon
+            .stub(refreshTokenService, 'createRefreshToken')
+            .resolves({ token: 'refresh-token', expiresAt: new Date().toISOString(), expiresInDays: 14 });
 
         const response = await request(app)
             .post('/auth/register')
@@ -88,5 +97,44 @@ describe('Auth routes', () => {
 
         expect(response.status).to.equal(409);
         expect(response.body).to.have.property('message', error.message);
+    });
+
+    it('refreshes the access token with a valid refresh token', async () => {
+        const refreshToken = 'old-refresh';
+        sinon.stub(refreshTokenService, 'findValidRefreshToken').resolves({
+            id: 1,
+            user_id: fakeUser.id,
+            token_hash: 'hash',
+            expires_at: new Date(Date.now() + 10000).toISOString()
+        });
+        sinon.stub(userService, 'findById').resolves(fakeUser);
+        const rotateStub = sinon
+            .stub(refreshTokenService, 'rotateRefreshToken')
+            .resolves({ token: 'new-refresh', expiresAt: new Date().toISOString(), expiresInDays: 14 });
+
+        const response = await request(app).post('/auth/refresh').send({ refreshToken });
+
+        expect(response.status).to.equal(200);
+        expect(response.body).to.have.property('refreshToken', 'new-refresh');
+        expect(response.body.user).to.deep.equal(fakeUser);
+        expect(rotateStub.calledWith({ token: refreshToken, userId: fakeUser.id })).to.be.true;
+    });
+
+    it('rejects refresh when refresh token is invalid', async () => {
+        sinon.stub(refreshTokenService, 'findValidRefreshToken').resolves(null);
+
+        const response = await request(app).post('/auth/refresh').send({ refreshToken: 'invalid' });
+
+        expect(response.status).to.equal(401);
+        expect(response.body).to.have.property('message', 'Refresh token inválido ou expirado');
+    });
+
+    it('logs out by deleting the refresh token', async () => {
+        const deleteStub = sinon.stub(refreshTokenService, 'deleteRefreshToken').resolves();
+
+        const response = await request(app).post('/auth/logout').send({ refreshToken: 'any' });
+
+        expect(response.status).to.equal(204);
+        expect(deleteStub.calledOnceWith('any')).to.be.true;
     });
 });

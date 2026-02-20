@@ -21,6 +21,14 @@ const findUserRecordByEmail = async (email) => {
     return rows.length ? rows[0] : null;
 };
 
+const findUserRecordById = async (id) => {
+    const rows = await db.query(
+        'SELECT id, academia_id, nome, email, role FROM Usuarios WHERE id = @id',
+        { id }
+    );
+    return rows.length ? rows[0] : null;
+};
+
 const authenticateUser = async ({ email, password }) => {
     const record = await findUserRecordByEmail(email);
     if (!record) {
@@ -76,6 +84,10 @@ const userService = {
     createUser,
     findByEmail: async (email) => {
         const record = await findUserRecordByEmail(email);
+        return record ? mapUserRecord(record) : null;
+    },
+    findById: async (id) => {
+        const record = await findUserRecordById(id);
         return record ? mapUserRecord(record) : null;
     }
 };

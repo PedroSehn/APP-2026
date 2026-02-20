@@ -6,10 +6,13 @@ if (!JWT_SECRET) {
     throw new Error('JWT_SECRET must be defined to validate tokens');
 }
 
+const respondUnauthorized = (res, message) =>
+    res.status(401).json({ message });
+
 const authenticate = (req, res, next) => {
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ message: 'Token de autorização ausente' });
+    if (!authHeader?.startsWith('Bearer ')) {
+        return respondUnauthorized(res, 'Token de autorização ausente');
     }
 
     const token = authHeader.split(' ')[1];
@@ -23,7 +26,11 @@ const authenticate = (req, res, next) => {
         };
         return next();
     } catch (error) {
-        return res.status(401).json({ message: 'Token inválido ou expirado' });
+        const message =
+            error.name === 'TokenExpiredError'
+                ? 'O token expirou'
+                : 'Token inválido ou expirado';
+        return respondUnauthorized(res, message);
     }
 };
 
@@ -32,7 +39,7 @@ const requireRole = (role) => {
 
     return (req, res, next) => {
         if (!req.user) {
-            return res.status(401).json({ message: 'Usuário não autenticado' });
+            return respondUnauthorized(res, 'Usuário não autenticado');
         }
 
         if (!expectedRoles.includes(req.user.role)) {

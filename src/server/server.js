@@ -5,7 +5,7 @@ import helmet from 'helmet';
 import db from '../config/db.js';
 import authRouter from '../routes/auth.js';
 import academiasRouter from '../routes/academias.js';
-import { authenticate } from '../middleware/auth.js';
+import { authenticate, requireRole } from '../middleware/auth.js';
 
 dotenv.config();
 
@@ -14,7 +14,7 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use('/auth', authRouter);
-app.use('/academias', authenticate, academiasRouter);
+app.use('/academias', authenticate, requireRole('admin'), academiasRouter);
 
 
 // Função para iniciar o servidor
@@ -94,7 +94,9 @@ const startServer = async () => {
     }
 };
 
-// Iniciar
-startServer();
+// Iniciar quando não estiver em ambiente de teste
+if (process.env.NODE_ENV !== 'test') {
+    startServer();
+}
 
 export default app;

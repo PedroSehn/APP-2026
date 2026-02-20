@@ -11,12 +11,17 @@
     "mssql": "^12.2.0"
   },
   "devDependencies": {
+    "chai": "^5.0.2",
     "concurrently": "^9.2.1",
-    "nodemon": "^3.1.11"
+    "mocha": "^10.2.0",
+    "nodemon": "^3.1.11",
+    "sinon": "^16.0.0",
+    "supertest": "^6.3.3"
   },
   "scripts": {
     "dev": "nodemon src/server/server.js",
-    "start": "node src/server/server.js"
+    "start": "node src/server/server.js",
+    "test": "mocha \"tests/**/*.test.js\" --exit"
   },
   "type": "module"
 }

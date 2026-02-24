@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import db from '../config/db.js';
 import authRouter from '../routes/auth.js';
 import academiasRouter from '../routes/academias.js';
+import alunosRouter from '../routes/alunos.js';
 import { authenticate, requireRole } from '../middleware/auth.js';
 
 dotenv.config();
@@ -15,6 +16,7 @@ app.use(cors());
 app.use(express.json());
 app.use('/auth', authRouter);
 app.use('/academias', authenticate, requireRole('admin'), academiasRouter);
+app.use('/alunos', authenticate, requireRole('admin'), alunosRouter);
 
 
 // Função para iniciar o servidor
@@ -57,7 +59,8 @@ const startServer = async () => {
                 database: 'SQL Server',
                 endpoints: {
                     health: '/health',
-                    academias: '/academias'
+                    academias: '/academias',
+                    alunos: '/alunos'
                 }
             });
         });

@@ -14,6 +14,7 @@ Servir de contexto para a equipe: a base é uma API em Node.js que dá suporte �
 - `POST /auth/register` – valida `name`, `email`, `password`, opcional `role` e `academiaId`, cria o usuário (`Usuarios`) com `bcrypt.hash`, devolvendo JWT com `sub`, `email`, `role`, `academiaId`.
 - `POST /auth/login` – autentica com `bcrypt.compare`, emite JWT e responde `{ token, expiresIn, user }`.
 - `GET /academias` – protegido por `authenticate`, lista `id`, `nome`, `cnpj`, `created_at`.
+- `POST /alunos`, `GET /alunos`, `PUT /alunos/:id`, `DELETE /alunos/:id` – CRUD protegido por `authenticate` + `requireRole('dono')`, filtra por `academia_id` e força `role = 'aluno'`.
 - `GET /health` – health check que tenta executar `SELECT TOP 1 * FROM Academias` e retorna status, carimbo e amostra.
 - `GET /` – rota raiz com versão e resumo de endpoints.
 

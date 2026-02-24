@@ -45,10 +45,20 @@ Defina em um `.env`:
 - Importe `authenticate` e `requireRole` de `src/middleware/auth.js` e aplique-os antes de montar o roteador privado (ex.: `app.use('/academias', authenticate, requireRole('admin'), academiasRouter)`).
 - Ambos os middlewares compartilham o payload do JWT via `req.user`, então rotas mais finas podem conferir `req.user.academiaId` ou outras propriedades adicionais antes de responder.
 
+### Painel do dono (`/owner`)
+- Montado em `app.use('/owner', authenticate, requireRole('dono'), ownerDashboardRouter)` e disponível apenas para usuários com `role = 'dono'`.
+- `GET /owner/planos` retorna os planos da academia do dono (`req.user.academiaId`) em `{ success, count, data }`.
+- `POST /owner/planos` cria um novo plano (`nome`, `valor`, `descricao?`) e dispara `409` caso já exista um plano com o mesmo nome na academia.
+- `GET /owner/dashboard/pending-subscriptions` lista assinaturas pendentes e vencidas por padrão (limit 25, offset 0, max 100) e aceita `limit/offset` como query params para paginação; cada item inclui fatura, assinatura, plano e aluno relacionados.
+- `GET /owner/dashboard/faturas` permite filtrar por `status`, `month`, `year`, `limit`, `offset` para revisar cobranças e traz metadados da assinatura/aluno.
+- `GET /owner/dashboard/financas` retorna a previsão de receita mensal por ano opcional (`year`), com totais agrupados por mês.
+- Todos os endpoints do painel reutilizam `planoService` e `dashboardService` para manter as queries isoladas em `src/services`.
+
 ### Testes automatizados
 - `tests/routes/auth.test.js` cobre `/auth/login` e `/auth/register`, garantindo tokens válidos e tratamento de credenciais duplicadas/invalidas com `userService` mockado.
 - `tests/routes/academias.test.js` valida as respostas de `/academias` quando um JWT válido (role `admin`) é fornecido e garante respostas 401 para tokens ausentes ou inválidos; o acesso ao banco também é mockado.
+- `tests/routes/ownerDashboard.test.js` garante o comportamento do painel do dono (listagem/criação de planos, filtros de faturas, assinaturas pendentes e previsão de receita) e valida os códigos HTTP esperados.
 
-- ### Banco de dados
-- Tabelas esperadas: `Usuarios` (com `email`, `password_hash`, `nome`, `role`, `academia_id`) e `Academias`. Cada `Academia` inclui um `owner_id` que referencia exclusivamente o usuário com `role = 'dono'`, reforçando que apenas o dono é o responsável pela própria academia. Funcionários continuam vinculados via `academia_id` e têm permissões de leitura naquela unidade.
-- As queries usam `db.query(...)` com parâmetros nomeados para evitar SQL injection.
+### Banco de dados
+- Tabelas esperadas: `Usuarios` (com `email`, `password_hash`, `nome`, `role`, `academia_id`), `Academias` (com `owner_id` apontando para o dono da unidade), `Planos` (cada plano ligado a uma `academia_id`), `Assinaturas` (referencia `aluno_id` e `plano_id`) e `Faturas` (com `assinatura_id`, `valor`, `data_vencimento`, `status` e `data_pagamento`).
+- As queries usam `db.query(...)` com parâmetros nomeados para evitar SQL injection e garantir que cada dono só leia/altere dados da própria academia.

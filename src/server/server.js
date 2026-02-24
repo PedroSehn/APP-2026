@@ -16,7 +16,7 @@ app.use(cors());
 app.use(express.json());
 app.use('/auth', authRouter);
 app.use('/academias', authenticate, requireRole('admin'), academiasRouter);
-app.use('/alunos', authenticate, requireRole('admin'), alunosRouter);
+app.use('/alunos', authenticate, requireRole(['admin', 'dono', 'funcionario']), alunosRouter);
 
 
 // Função para iniciar o servidor

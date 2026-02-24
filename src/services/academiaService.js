@@ -1,11 +1,12 @@
 import db from '../config/db.js';
 
-const SELECT_COLUMNS = 'id, nome, cnpj, created_at';
+const SELECT_COLUMNS = 'id, nome, cnpj, owner_id, created_at';
 
 const mapAcademiaRecord = (record) => ({
     id: record.id,
     nome: record.nome,
     cnpj: record.cnpj,
+    ownerId: record.owner_id,
     createdAt: record.created_at
 });
 
@@ -91,12 +92,46 @@ const deleteAcademia = async (id) => {
     return mapAcademiaRecord(rows[0]);
 };
 
+const ensureAcademiaOwnedByUser = async (academiaId, userId) => {
+    const rows = await db.query('SELECT owner_id FROM Academias WHERE id = @id', { id: academiaId });
+    throwIfNotFound(rows);
+    const ownerId = rows[0].owner_id;
+    if (ownerId !== userId) {
+        const error = new Error('Usuário não é o dono desta academia');
+        error.code = 'OWNER_MISMATCH';
+        throw error;
+    }
+    return true;
+};
+
+const assignOwnerToAcademia = async ({ academiaId, ownerId }) => {
+    const rows = await db.query('SELECT owner_id FROM Academias WHERE id = @id', { id: academiaId });
+    throwIfNotFound(rows);
+    const currentOwnerId = rows[0].owner_id;
+    if (currentOwnerId && currentOwnerId !== ownerId) {
+        const error = new Error('Esta academia já possui um dono');
+        error.code = 'ACADEMIA_HAS_OWNER';
+        throw error;
+    }
+
+    await db.query(
+        `
+            UPDATE Academias
+            SET owner_id = @ownerId
+            WHERE id = @id
+        `,
+        { ownerId, id: academiaId }
+    );
+};
+
 const academiaService = {
     listAcademias,
     getAcademiaById,
     createAcademia,
     updateAcademia,
-    deleteAcademia
+    deleteAcademia,
+    ensureAcademiaOwnedByUser,
+    assignOwnerToAcademia
 };
 
 export default academiaService;

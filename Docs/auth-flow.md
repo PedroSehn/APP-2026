@@ -2,9 +2,10 @@
 
 This project now exposes a JWT-based authentication flow built on top of the existing Express + SQL Server stack.
 
-### Entry points
+-### Entry points
 - `POST /auth/register`  
-  - Validates `name`, `email`, `password`, optional `role` and `academiaId`.
+  - Validates `name`, `email`, `password`, optional `role` (`admin`, `dono`, `funcionario`, `aluno`) and `academiaId`.
+  - Donos must provide `academiaId`; the request creates a `Usuarios` row and calls `academiaService.assignOwnerToAcademia` so `Academias.owner_id` mirrors the new user. Funcionários também precisam de `academiaId` mas mantêm o `owner_id`.
   - Hashes the password with `bcryptjs`, inserts the user into `Usuarios`, and signs a JWT that embeds `id`, `email`, `role` and `academiaId`.
 - `POST /auth/login`  
   - Validates `email` and `password`.
@@ -13,17 +14,20 @@ This project now exposes a JWT-based authentication flow built on top of the exi
 
 Each response shares the same payload structure (`token`, `expiresIn`, and the user object) so the client can reuse it for both onboarding and subsequent logins.
 
-### Supporting services
+-### Supporting services
 - `src/services/userService.js`  
   - Queries `Usuarios` via `db.query`.
-  - Provides `authenticateUser` and `createUser` helpers that handle bcrypt hashing/comparison and email uniqueness checks.
+  - Provides `authenticateUser` and `createUser` helpers that handle bcrypt hashing/comparison, email uniqueness checks, and enforce valid roles (`admin`, `dono`, `funcionario`, `aluno`).
   - Maps database columns (`nome`, `academia_id`, etc.) into a clean DTO before returning data to callers.
+- `src/services/academiaService.js`
+  - `assignOwnerToAcademia` ensures each `Academias` row keeps a single owner and returns an error if a different owner already exists.
 
-### Middleware guard
+-### Middleware guard
 - `src/middleware/auth.js` exports:
   - `authenticate`: checks `Authorization: Bearer <token>` headers and verifies the token with `jsonwebtoken`.
   - `requireRole`: factory that enforces a specific role (or roles) once `req.user` exists.
   - `req.user` is populated with `id`, `email`, `role`, and `academiaId` for downstream handlers.
+  - `requireRole('dono')` together with `req.user.academiaId` is used when owner-only actions need to assert `Academias.owner_id = req.user.id`, while read-only handlers can accept `['dono','funcionario']`.
 
 ### Route wiring
 - `src/server/server.js` mounts:

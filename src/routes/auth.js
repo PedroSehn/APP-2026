@@ -3,6 +3,7 @@ import { body, validationResult } from 'express-validator';
 import jwt from 'jsonwebtoken';
 import userService from '../services/userService.js';
 import refreshTokenService from '../services/refreshTokenService.js';
+import academiaService from '../services/academiaService.js';
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -64,7 +65,19 @@ router.post(
         body('name').trim().notEmpty(),
         body('email').isEmail().normalizeEmail(),
         body('password').isLength({ min: 6 }),
-        body('role').optional().isString().trim(),
+        body('role').optional().isIn(['admin', 'aluno', 'dono', 'funcionario']),
+        body('academiaId')
+            .if(body('role').equals('dono'))
+            .exists()
+            .withMessage('Academia obrigatória para donos')
+            .bail()
+            .isInt({ min: 1 }),
+        body('academiaId')
+            .if(body('role').equals('funcionario'))
+            .exists()
+            .withMessage('Academia obrigatória para funcionários')
+            .bail()
+            .isInt({ min: 1 }),
         body('academiaId').optional().isInt({ min: 1 })
     ],
     async (req, res, next) => {
@@ -73,23 +86,36 @@ router.post(
             return res.status(400).json({ errors: errors.array() });
         }
 
-        const { name, email, password, role, academiaId } = req.body;
+        const { name, email, password, role } = req.body;
+        const academiaId = req.body.academiaId ?? null;
+
         try {
             const user = await userService.createUser({
                 name,
                 email,
                 password,
                 role,
-                academiaId: academiaId ?? null
+                academiaId
             });
+
+            if (user.role === 'dono') {
+                await academiaService.assignOwnerToAcademia({
+                    academiaId: user.academiaId,
+                    ownerId: user.id
+                });
+            }
 
             const token = createToken(user);
             const refreshData = await refreshTokenService.createRefreshToken(user.id);
             return res.status(201).json(responsePayload(user, token, refreshData));
         } catch (error) {
-            if (error.code === 'USER_ALREADY_EXISTS') {
+            if (error.code === 'USER_ALREADY_EXISTS' || error.code === 'ACADEMIA_HAS_OWNER') {
                 return res.status(409).json({ message: error.message });
             }
+            if (error.code === 'USER_INVALID_ROLE' || error.code === 'OWNER_REQUIRES_ACADEMIA') {
+                return res.status(400).json({ message: error.message });
+            }
+
             next(error);
         }
     }

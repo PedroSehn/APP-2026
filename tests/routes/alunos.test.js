@@ -22,6 +22,13 @@ describe('Alunos route', () => {
     };
 
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const funcionarioPayload = {
+        sub: 2,
+        email: 'funcionario@example.com',
+        role: 'funcionario',
+        academiaId: 10
+    };
+    const funcionarioToken = jwt.sign(funcionarioPayload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     it('lists alunos scoped to academia', async () => {
         const alunos = [
@@ -128,6 +135,50 @@ describe('Alunos route', () => {
 
         expect(response.status).to.equal(400);
         expect(response.body).to.have.property('message');
+    });
+
+    it('allows funcionario to list alunos', async () => {
+        const alunos = [
+            { id: 7, name: 'Aluno E', email: 'e@e.com', role: 'aluno', academiaId: 10 }
+        ];
+        sinon.stub(alunoService, 'listAlunos').resolves(alunos);
+
+        const response = await request(app)
+            .get('/alunos')
+            .set('Authorization', `Bearer ${funcionarioToken}`);
+
+        expect(response.status).to.equal(200);
+        expect(response.body.count).to.equal(alunos.length);
+        expect(response.body.data).to.deep.equal(alunos);
+    });
+
+    it('rejects funcionario when trying to create an aluno', async () => {
+        const response = await request(app)
+            .post('/alunos')
+            .send({ name: 'Aluno F', email: 'f@f.com', password: 'secret123' })
+            .set('Authorization', `Bearer ${funcionarioToken}`);
+
+        expect(response.status).to.equal(403);
+        expect(response.body).to.have.property('message', 'Permissão insuficiente');
+    });
+
+    it('rejects funcionario when trying to update an aluno', async () => {
+        const response = await request(app)
+            .put('/alunos/1')
+            .send({ name: 'Novo Nome' })
+            .set('Authorization', `Bearer ${funcionarioToken}`);
+
+        expect(response.status).to.equal(403);
+        expect(response.body).to.have.property('message', 'Permissão insuficiente');
+    });
+
+    it('rejects funcionario when trying to delete an aluno', async () => {
+        const response = await request(app)
+            .delete('/alunos/1')
+            .set('Authorization', `Bearer ${funcionarioToken}`);
+
+        expect(response.status).to.equal(403);
+        expect(response.body).to.have.property('message', 'Permissão insuficiente');
     });
 
     it('deletes an aluno', async () => {

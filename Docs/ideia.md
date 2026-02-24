@@ -1,7 +1,7 @@
 # 📋 PROMPT COMPLETO - Micro SaaS Academias
 
 ## 🎯 OBJETIVO
-Servir de contexto para a equipe: a base é uma API em Node.js que dá suporte à gestão de academias, com usuários ligados a academias, níveis de acesso (aluno/dono) e tabelas projetadas para planos, aulas, horários, assinaturas, faturas e presença.
+Servir de contexto para a equipe: a base é uma API em Node.js que dá suporte à gestão de academias, com usuários ligados a academias e quatro papéis principais (`admin`, `dono`, `funcionario`, `aluno`). O `dono` controla sua academia, `funcionario` revisa dados e alunos dessa academia sem mutar, `admin` gerencia todo o sistema, e `aluno` representa os membros acompanhados pelas tabelas de planos, aulas, horários, assinaturas, faturas e presença.
 
 ## 🧱 ARQUITETURA ATUAL
 - **Backend:** Node.js + Express 5 (`src/server/server.js`) com `helmet`, `cors`, parsing JSON e roteamento modular.
@@ -13,14 +13,13 @@ Servir de contexto para a equipe: a base é uma API em Node.js que dá suporte �
 ## 🚀 FUNCIONALIDADES IMPLEMENTADAS
 - `POST /auth/register` – valida `name`, `email`, `password`, opcional `role` e `academiaId`, cria o usuário (`Usuarios`) com `bcrypt.hash`, devolvendo JWT com `sub`, `email`, `role`, `academiaId`.
 - `POST /auth/login` – autentica com `bcrypt.compare`, emite JWT e responde `{ token, expiresIn, user }`.
-- `GET /academias` – protegido por `authenticate`, lista `id`, `nome`, `cnpj`, `created_at`.
-- `POST /alunos`, `GET /alunos`, `PUT /alunos/:id`, `DELETE /alunos/:id` – CRUD protegido por `authenticate` + `requireRole('dono')`, filtra por `academia_id` e força `role = 'aluno'`.
+- `GET /academias` – protegido por `authenticate`, lista `id`, `nome`, `cnpj`, `created_at`, `owner_id`.
+- `POST /alunos`, `GET /alunos`, `PUT /alunos/:id`, `DELETE /alunos/:id` – CRUD protegido por `authenticate` + `requireRole('dono')`, filtra por `academia_id` e força `role = 'aluno'`. `GET /alunos` e `GET /alunos/:id` também podem ser usados por `funcionario` para revisar estudantes da mesma academia.
 - `GET /health` – health check que tenta executar `SELECT TOP 1 * FROM Academias` e retorna status, carimbo e amostra.
 - `GET /` – rota raiz com versão e resumo de endpoints.
 
-## 🗂️ ESTRUTURA DO BANCO (fonte definitiva: `Docs/Extrutura-banco-dados`)
-- `Academias` (`id`, `nome`, `cnpj`, `created_at`).
-- `Usuarios` (`academia_id`, `nome`, `email`, `password_hash`, `role`, `created_at`) com `academia_id` opcional e `role` indicando `aluno` ou `dono`.
+- `Academias` (`id`, `nome`, `cnpj`, `owner_id`, `created_at`), onde cada `owner_id` aponta para um usuário com `role = 'dono'`.
+- `Usuarios` (`academia_id`, `nome`, `email`, `password_hash`, `role`, `created_at`) com `academia_id` opcional e `role` indicando `admin`, `aluno`, `funcionario` ou `dono`; apenas o `dono` pode ser referenciado em `Academias.owner_id`, enquanto `funcionario` usa `academia_id` para leitura restrita.
 - `Planos`, `Aulas`, `Horarios`, `Assinaturas`, `Faturas` e `Presencas` com as chaves estrangeiras necessárias para relacionar usuários, academias, planos, aulas e presenças.
 
 ## 🧰 CONVENÇÕES E PADRÕES

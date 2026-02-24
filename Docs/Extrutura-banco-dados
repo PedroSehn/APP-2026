@@ -6,6 +6,7 @@ CREATE TABLE Academias (
     id INT IDENTITY(1,1) PRIMARY KEY,
     nome NVARCHAR(100) NOT NULL UNIQUE,
     cnpj NVARCHAR(18) NOT NULL UNIQUE,
+    owner_id INT NULL,
     created_at DATETIME2 DEFAULT GETDATE()
 );
 
@@ -90,3 +91,16 @@ CREATE TABLE RefreshTokens (
 );
 
 CREATE INDEX IX_RefreshTokens_UserId ON RefreshTokens(user_id);
+
+-- Assignments and roles
+ALTER TABLE Academias
+    ADD CONSTRAINT FK_Academias_Usuarios_Owner FOREIGN KEY (owner_id) REFERENCES Usuarios(id) ON DELETE SET NULL;
+
+CREATE UNIQUE INDEX UX_Academias_OwnerId ON Academias(owner_id);
+
+-- Usuários podem ter quatro papéis diferentes:
+--   * `'admin'` controla toda a API;
+--   * `'dono'` aparece como `owner_id` em `Academias` e garante os privilégios totais daquela unidade;
+--   * `'funcionario'` fica vinculado a uma academia existente (`academia_id`) e tem acesso apenas para leitura/resumo daquele espaço;
+--   * `'aluno'` representa membros vinculados (role usada em filtros como os de `alunoService.js`).
+-- A coluna `owner_id` em Academias sempre aponta para um usuário com `role = 'dono'`.

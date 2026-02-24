@@ -3,6 +3,7 @@ import db from '../config/db.js';
 
 const SALT_ROUNDS = 10;
 const DEFAULT_ROLE = 'aluno';
+const VALID_ROLES = ['admin', 'aluno', 'dono', 'funcionario'];
 
 const mapUserRecord = (record) => ({
     id: record.id,
@@ -55,7 +56,19 @@ const createUser = async ({ name, email, password, role, academiaId }) => {
     }
 
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
-    const normalizedRole = role?.trim() || DEFAULT_ROLE;
+    const normalizedRole = role ? role.trim().toLowerCase() : DEFAULT_ROLE;
+
+    if (!VALID_ROLES.includes(normalizedRole)) {
+        const error = new Error('Role inválida');
+        error.code = 'USER_INVALID_ROLE';
+        throw error;
+    }
+
+    if (normalizedRole === 'dono' && !academiaId) {
+        const error = new Error('Dono precisa estar vinculado a uma academia');
+        error.code = 'OWNER_REQUIRES_ACADEMIA';
+        throw error;
+    }
 
     const result = await db.query(
         `

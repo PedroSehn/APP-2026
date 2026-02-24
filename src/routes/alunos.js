@@ -1,6 +1,7 @@
 import express from 'express';
 import { body, param, validationResult } from 'express-validator';
 import alunoService from '../services/alunoService.js';
+import { requireRole } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -32,7 +33,7 @@ const handleServiceError = (error, res, next) => {
     return next(error);
 };
 
-router.get('/', async (req, res, next) => {
+router.get('/', requireRole(['admin', 'dono', 'funcionario']), async (req, res, next) => {
     try {
         const alunos = await alunoService.listAlunos(req.user.academiaId);
         return res.json({
@@ -47,6 +48,7 @@ router.get('/', async (req, res, next) => {
 
 router.get(
     '/:id',
+    requireRole(['admin', 'dono', 'funcionario']),
     [param('id').isInt({ min: 1 })],
     async (req, res, next) => {
         const validationError = handleValidationErrors(req, res);
@@ -66,6 +68,7 @@ router.get(
 
 router.post(
     '/',
+    requireRole(['admin', 'dono']),
     [
         body('name').trim().notEmpty(),
         body('email').isEmail().normalizeEmail(),
@@ -94,6 +97,7 @@ router.post(
 
 router.put(
     '/:id',
+    requireRole(['admin', 'dono']),
     [
         param('id').isInt({ min: 1 }),
         body('name').optional().trim().notEmpty(),
@@ -129,6 +133,7 @@ router.put(
 
 router.delete(
     '/:id',
+    requireRole(['admin', 'dono']),
     [param('id').isInt({ min: 1 })],
     async (req, res, next) => {
         const validationError = handleValidationErrors(req, res);

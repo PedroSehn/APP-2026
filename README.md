@@ -2,8 +2,8 @@
 
 Uma API mínima em **Express** que conecta com um banco **SQL Server**, gerencia usuários com registro/login e protege recursos com **tokens JWT**.
 
-### Ideia principal
-- Suporta registro e login de usuários vinculados a academias.
+- ### Ideia principal
+- Suporta registro e login de usuários vinculados a academias e define quatro papéis principais: `admin`, `dono`, `funcionario` e `aluno`.
 - Gera JWTs assinados com `process.env.JWT_SECRET` (e.g. `JWT_EXPIRES_IN`) para autorizar rotas como `/academias`.
 - Usa `bcryptjs` para hash de senhas e `jsonwebtoken` para verificar credenciais em cada requisição protegida.
 - Mantém a lógica de banco centralizada em `src/config/db.js`, com pool `mssql` e helpers reutilizáveis.
@@ -28,9 +28,10 @@ Defina em um `.env`:
 - `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_INSTANCE`
 
 ### Endpoints principais
-- `POST /auth/register` – registra usuário (nome, email, password, role opcional, academiaId opcional).
+- `POST /auth/register` – registra usuário (nome, email, password, role opcional, academiaId opcional). Donos precisam informar uma academia e recebem `Academias.owner_id` associado automaticamente.
 - `POST /auth/login` – valida credenciais e retorna `{ token, expiresIn, user }`.
-- `GET /academias` – protegido; exige token JWT válido e role `admin` para listar academias (`id`, `nome`, `cnpj`, `created_at`).
+- `GET /academias` – protegido; exige token JWT válido e role `admin` para listar academias. As listas incluem `owner_id`, enquanto rotas com controle de dono verificam `role = 'dono'` e `Academias.owner_id` para garantir que apenas o proprietário manipule seus dados.
+- `/alunos` – GET/GET por ID pode ser dirigido tanto por `dono` quanto por `funcionario` para revisar alunos atrelados à academia do mesmo `academiaId`. POST/PUT/DELETE continuam restritos ao `dono`.
 - `GET /health` – rota pública para verificar saúde da API.
 
 ### Fluxo de autenticação
@@ -48,6 +49,6 @@ Defina em um `.env`:
 - `tests/routes/auth.test.js` cobre `/auth/login` e `/auth/register`, garantindo tokens válidos e tratamento de credenciais duplicadas/invalidas com `userService` mockado.
 - `tests/routes/academias.test.js` valida as respostas de `/academias` quando um JWT válido (role `admin`) é fornecido e garante respostas 401 para tokens ausentes ou inválidos; o acesso ao banco também é mockado.
 
-### Banco de dados
-- Tabelas esperadas: `Usuarios` (com `email`, `password_hash`, `nome`, `role`, `academia_id`) e `Academias`.
+- ### Banco de dados
+- Tabelas esperadas: `Usuarios` (com `email`, `password_hash`, `nome`, `role`, `academia_id`) e `Academias`. Cada `Academia` inclui um `owner_id` que referencia exclusivamente o usuário com `role = 'dono'`, reforçando que apenas o dono é o responsável pela própria academia. Funcionários continuam vinculados via `academia_id` e têm permissões de leitura naquela unidade.
 - As queries usam `db.query(...)` com parâmetros nomeados para evitar SQL injection.

@@ -7,6 +7,7 @@ import authRouter from '../routes/auth.js';
 import academiasRouter from '../routes/academias.js';
 import alunosRouter from '../routes/alunos.js';
 import ownerDashboardRouter from '../routes/ownerDashboard.js';
+import aulasRouter from '../routes/aulas.js';
 import { authenticate, requireRole } from '../middleware/auth.js';
 
 dotenv.config();
@@ -19,6 +20,7 @@ app.use('/auth', authRouter);
 app.use('/academias', authenticate, requireRole('admin'), academiasRouter);
 app.use('/alunos', authenticate, requireRole(['admin', 'dono', 'funcionario']), alunosRouter);
 app.use('/owner', authenticate, requireRole('dono'), ownerDashboardRouter);
+app.use('/aulas', authenticate, requireRole(['admin', 'dono']), aulasRouter);
 
 
 // Função para iniciar o servidor

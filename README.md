@@ -32,6 +32,7 @@ Defina em um `.env`:
 - `POST /auth/login` – valida credenciais e retorna `{ token, expiresIn, user }`.
 - `GET /academias` – protegido; exige token JWT válido e role `admin` para listar academias. As listas incluem `owner_id`, enquanto rotas com controle de dono verificam `role = 'dono'` e `Academias.owner_id` para garantir que apenas o proprietário manipule seus dados.
 - `/alunos` – GET/GET por ID pode ser dirigido tanto por `dono` quanto por `funcionario` para revisar alunos atrelados à academia do mesmo `academiaId`. POST/PUT/DELETE continuam restritos ao `dono`.
+- `/aulas` – CRUD protegido por JWT e `requireRole(['admin', 'dono'])`. `GET /aulas` e `GET /aulas/:id` consultam apenas aulas da academia do token, enquanto `POST`, `PUT` e `DELETE` aceitam `nome` obrigatório e `descricao` opcional para criar/atualizar registros do mesmo `academiaId`.
 - `GET /health` – rota pública para verificar saúde da API.
 
 ### Fluxo de autenticação

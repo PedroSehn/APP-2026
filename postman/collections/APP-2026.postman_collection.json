@@ -1,0 +1,936 @@
+{
+  "info": {
+    "_postman_id": "c8034a05-ce27-436e-a0e1-559c41f2616e",
+    "name": "APP-2026",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "7acecfea-0163-4973-b478-d3de1e5a5a8e",
+                "exec": [
+                  "// Supondo que o response venha assim: { \"token\": \"jwt_aqui\" }\r",
+                  "const res = pm.response.json();\r",
+                  "\r",
+                  "// Salva o token no ambiente\r",
+                  "pm.environment.set(\"JWT_TOKEN\", res.token);\r",
+                  "\r",
+                  "// (Opcional) teste de status\r",
+                  "pm.test(\"Login 200\", () => {\r",
+                  "  pm.response.to.have.status(200);\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "72461458-8fa1-48bf-9e6a-cb6053620585",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "id": "d546b209-ea3b-4c9c-a3de-446ff1bf4a94",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "uuid": "9e22241b-cd38-4179-a180-401fe674cf1b"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n      \"email\": \"donotest@example.com\",\n      \"password\": \"strong-password\"\n    }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/auth/login",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "id": "641311c9-6abf-4bde-9a99-cd28df273975",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "uuid": "7d50b244-4317-424e-ad98-cb4721316514"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n      \"refreshToken\": \"828ff64908d9d65ced9c4e622c19a5746fbd4a74e068abdaf9b2e4c843c2afd32a2468fc7bf6d9bb6e5e9806f9391ba2\"\n    }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/auth/logout",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar usuario",
+          "id": "c41fca8c-ef08-4408-ab5f-fc96f14ed6ab",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "uuid": "d4426626-9fb3-4172-807d-0f5ae95ef689"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n      \"name\": \"Dono Teste\",\n      \"email\": \"donotest@example.com\",\n      \"password\": \"strong-password\",\n      \"role\": \"dono\",\n      \"academiaId\": 3\n    }   ",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/auth/register",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "id": "0b0087c5-f8e2-47bf-94d5-14ac7dd6b000",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "uuid": "65f082d0-4251-4909-995e-bf0f12e7a8a3"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n      \"refreshToken\": \"828ff64908d9d65ced9c4e622c19a5746fbd4a74e068abdaf9b2e4c843c2afd32a2468fc7bf6d9bb6e5e9806f9391ba2\"\n    }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/auth/refresh",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3001",
+              "path": [
+                "auth",
+                "refresh"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "c22a23c1-df0d-4c25-a059-ae43d86edcb9"
+    },
+    {
+      "name": "Alunos",
+      "item": [
+        {
+          "name": "Criar Aluno",
+          "id": "1b741b51-350a-45c5-b623-8d5016f179b6",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}",
+                "uuid": "2561c59e-c6ef-4730-b9c0-cc1904eda56f"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "uuid": "8f7c3ea1-e96a-4b13-952b-479e5dde250d"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Ana Aluno\",\"email\":\"ana@academia.com\",\"password\":\"strongPass1\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/alunos",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "alunos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Alunos",
+          "id": "451b89ef-5058-4fe0-afbf-ba25f2a8c110",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}",
+                "uuid": "1f26782a-828e-4288-a931-1d0f0f50862a"
+              }
+            ],
+            "url": {
+              "raw": "{{API_URL}}/alunos",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "alunos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar Aluno por ID",
+          "id": "01fe49d7-408c-47a3-8217-9c0ec0fe2b47",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMsImVtYWlsIjoiYWRtdGVzdEBleGFtcGxlLmNvbSIsInJvbGUiOiJhZG1pbiIsImFjYWRlbWlhSWQiOjEsImlhdCI6MTc3MTkzNzkyNywiZXhwIjoxNzcxOTQxNTI3fQ.w5rwbfXh0-CdBZ__Q42MzMyo5yHIJXJCtbPhiFa4n7E",
+                "uuid": "97518832-c439-4dd3-ad24-2e2b9d5d4bd0"
+              }
+            ],
+            "url": {
+              "raw": "{{API_URL}}/alunos/4",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "alunos",
+                "4"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar Aluno por ID",
+          "id": "7032e6a6-7e63-4520-a569-f15e6013f635",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMsImVtYWlsIjoiYWRtdGVzdEBleGFtcGxlLmNvbSIsInJvbGUiOiJhZG1pbiIsImFjYWRlbWlhSWQiOjEsImlhdCI6MTc3MTkzNzkyNywiZXhwIjoxNzcxOTQxNTI3fQ.w5rwbfXh0-CdBZ__Q42MzMyo5yHIJXJCtbPhiFa4n7E",
+                "uuid": "7c664c1a-fdbc-461d-8cc4-7add87649212"
+              }
+            ],
+            "url": {
+              "raw": "{{API_URL}}/alunos/4",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "alunos",
+                "4"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Alterar Aluno por ID",
+          "id": "fc16204f-c5c5-498b-94b5-637e1f8573e4",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMsImVtYWlsIjoiYWRtdGVzdEBleGFtcGxlLmNvbSIsInJvbGUiOiJhZG1pbiIsImFjYWRlbWlhSWQiOjEsImlhdCI6MTc3MTkzNzkyNywiZXhwIjoxNzcxOTQxNTI3fQ.w5rwbfXh0-CdBZ__Q42MzMyo5yHIJXJCtbPhiFa4n7E",
+                "uuid": "b0898a57-e87b-4127-bfa4-4c43b5e5e919"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "uuid": "5a0b1805-4c18-4ab7-84e7-322073f00e40"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Ana Atualizada\",\"email\":\"ana.updated@academia.com\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/alunos/4",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "alunos",
+                "4"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "ce1389e3-d4d9-4bba-81f8-2abed7ed0684"
+    },
+    {
+      "name": "Aulas",
+      "item": [
+        {
+          "name": "Alterar aula",
+          "id": "181e64bc-8f0b-4da5-9b11-9f0db35b2891",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}",
+                "uuid": "4c3ab841-b659-4cfb-a871-1028c1a96e6c"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "uuid": "a968e4cf-846d-458c-8138-61108b58f611"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nome\":\"Yoga Flow\",\"descricao\":\"Força e respiração\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/aulas/5",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "aulas",
+                "5"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar aula por ID",
+          "id": "1173f886-b55c-4c63-8ce0-e19936b9f948",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}",
+                "uuid": "104a3ef6-8a95-4758-aa5a-0bc0406f0f98"
+              }
+            ],
+            "url": {
+              "raw": "{{API_URL}}/aulas/5",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "aulas",
+                "5"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar aula por ID",
+          "id": "7d51a7f0-1d96-4ede-8607-b3dee9540276",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}",
+                "uuid": "fd8d8d91-b96f-41a2-bb28-e020de1ab2f5"
+              }
+            ],
+            "url": {
+              "raw": "{{API_URL}}/aulas/5",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "aulas",
+                "5"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar aula",
+          "id": "b8029b91-b572-48ef-a78c-7f5533ea1a4c",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}",
+                "uuid": "d07cc316-d15f-4b3e-be7f-09c1f9c509fc"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "uuid": "e70572b3-787c-45b7-8adf-6c8831f7a775"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nome\":\"Yoga Flow\",\"descricao\":\"Alongamento e respiração\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/aulas",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "aulas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Aulas",
+          "id": "4e8a59d0-315b-42ba-a4ef-6070c09e7090",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}",
+                "uuid": "755bdb30-80d1-4e1b-b9da-aa2d220dcb5c"
+              }
+            ],
+            "url": {
+              "raw": "{{API_URL}}/aulas",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "aulas"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "bda11602-9a2a-4d67-aefe-a1b6b542c086"
+    },
+    {
+      "name": "Academias",
+      "item": [
+        {
+          "name": "Listar Academias",
+          "id": "e692a05f-3506-4bba-bd83-0acb9aee5a03",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMsImVtYWlsIjoiYWRtdGVzdEBleGFtcGxlLmNvbSIsInJvbGUiOiJhZG1pbiIsImFjYWRlbWlhSWQiOjEsImlhdCI6MTc3MTg0MDczOSwiZXhwIjoxNzcxODQ0MzM5fQ.CrjXHZQlwsQ_D8qBrSSNjzYS2g5jk_MfFydPFXHlO3o",
+                "uuid": "f1326cf3-c59e-462c-a624-f1ffe129d417"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3001/academias",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3001",
+              "path": [
+                "academias"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar Academia por ID",
+          "id": "f55363a7-cb9c-41b3-bcc0-a506dde8ca23",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMsImVtYWlsIjoiYWRtdGVzdEBleGFtcGxlLmNvbSIsInJvbGUiOiJhZG1pbiIsImFjYWRlbWlhSWQiOjEsImlhdCI6MTc3MTg0MDczOSwiZXhwIjoxNzcxODQ0MzM5fQ.CrjXHZQlwsQ_D8qBrSSNjzYS2g5jk_MfFydPFXHlO3o",
+                "uuid": "d962a0b6-586c-48ef-b674-08780fd55642"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3001/academias/5",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3001",
+              "path": [
+                "academias",
+                "5"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Alterar academia por ID",
+          "id": "181035a6-737c-4e01-9177-d07640f8986f",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMsImVtYWlsIjoiYWRtdGVzdEBleGFtcGxlLmNvbSIsInJvbGUiOiJhZG1pbiIsImFjYWRlbWlhSWQiOjEsImlhdCI6MTc3MTg0MDczOSwiZXhwIjoxNzcxODQ0MzM5fQ.CrjXHZQlwsQ_D8qBrSSNjzYS2g5jk_MfFydPFXHlO3o",
+                "uuid": "79ef6512-2f68-4f1e-894b-3c2d1f1efd6e"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "uuid": "5a9f25eb-4be8-4559-a7ab-de8b112b5b86"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nome\":\"Academia Atualizada\",\"cnpj\":\"12.345.678/0001-99\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/academias/5",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3001",
+              "path": [
+                "academias",
+                "5"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar Academia",
+          "id": "236ad9e8-cd84-4973-a8c3-0e30a6058306",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMsImVtYWlsIjoiYWRtdGVzdEBleGFtcGxlLmNvbSIsInJvbGUiOiJhZG1pbiIsImFjYWRlbWlhSWQiOjEsImlhdCI6MTc3MTg0MDczOSwiZXhwIjoxNzcxODQ0MzM5fQ.CrjXHZQlwsQ_D8qBrSSNjzYS2g5jk_MfFydPFXHlO3o",
+                "uuid": "85fa8011-5d81-4463-84aa-dee54308d5cd"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "uuid": "68fd62d5-a700-495a-b0f4-3dc002bc18ca"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nome\":\"Nova Academia\",\"cnpj\":\"12.345.678/0001-99\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3001/academias",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3001",
+              "path": [
+                "academias"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "1778df67-685f-40a1-aed4-8bd91f5d2e04"
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get previsao ganhos",
+          "id": "91b4d7d9-222a-414f-9a24-1befc745ba14",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}",
+                "uuid": "75990981-829a-4a65-a0be-c37955f6b141"
+              }
+            ],
+            "url": {
+              "raw": "{{API_URL}}/owner/dashboard/financas?year=2025",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "owner",
+                "dashboard",
+                "financas"
+              ],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "2025",
+                  "uuid": "ef72a684-435b-40a4-9100-7e7e15d79707"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar assinaturas pendentes por mes com limite",
+          "id": "b6a07b90-1ad0-41ea-9bc5-d01ba0d37242",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}",
+                "uuid": "566aa598-c803-4a3c-b332-6bf8197e23be"
+              }
+            ],
+            "url": {
+              "raw": "{{API_URL}}/owner/dashboard/faturas?status=PENDENTE&month=4&year=2025&limit=15",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "owner",
+                "dashboard",
+                "faturas"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "PENDENTE",
+                  "uuid": "0b565a36-dcb7-47ad-95f8-f831ef14869c"
+                },
+                {
+                  "key": "month",
+                  "value": "4",
+                  "uuid": "b758a8a6-2638-42fe-a937-3c44febe5880"
+                },
+                {
+                  "key": "year",
+                  "value": "2025",
+                  "uuid": "0bd75407-680b-4686-9875-b967e1c58d2a"
+                },
+                {
+                  "key": "limit",
+                  "value": "15",
+                  "uuid": "672c08e1-c36c-40d6-8469-e07b9d15d8e3"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar assinaturas pendentes paginado",
+          "id": "3d7b6101-a8b6-4df3-bab6-aa4a5ec7d168",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}",
+                "uuid": "c98068e3-966b-42ab-b164-5fdad5aac36a"
+              }
+            ],
+            "url": {
+              "raw": "{{API_URL}}/owner/dashboard/pending-subscriptions?limit=10&offset=20",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "owner",
+                "dashboard",
+                "pending-subscriptions"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "uuid": "1b64c4ea-f1e1-4c0c-b006-4ea81d31286f"
+                },
+                {
+                  "key": "offset",
+                  "value": "20",
+                  "uuid": "27b91607-c8ba-4a84-a7ef-77ff1cf8b1a1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Assinaturas Pendentes",
+          "id": "c8643bc5-b513-4613-8596-39c681be25eb",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}",
+                "uuid": "b11ea884-876c-4387-9b59-a36854ecdd76"
+              }
+            ],
+            "url": {
+              "raw": "{{API_URL}}/owner/dashboard/pending-subscriptions",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "owner",
+                "dashboard",
+                "pending-subscriptions"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "06127a76-843b-4408-bc76-3bea49a52097"
+    },
+    {
+      "name": "Planos",
+      "item": [
+        {
+          "name": "Criar Plano",
+          "id": "2c20889f-fe89-46e5-8f8b-3e808600b649",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "uuid": "7425b1cd-2a11-49c5-b597-64adaeb9bd7a"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}",
+                "uuid": "689f48ed-1595-4fec-b213-107d29e26ce5"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nome\":\"Plano Base\",\"valor\":49.9,\"descricao\":\"Auas 3 vezes na semana\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/owner/planos",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "owner",
+                "planos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Planos disponiveis",
+          "id": "237a0d49-28fd-4bb9-9e81-fad9326f7a2e",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}",
+                "uuid": "a939c2b9-b238-47d3-9d57-fd641d111b18"
+              }
+            ],
+            "url": {
+              "raw": "{{API_URL}}/owner/planos",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "owner",
+                "planos"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "398afd5b-7f63-411c-96cf-0c39973d99df"
+    }
+  ]
+}

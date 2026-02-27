@@ -3,6 +3,7 @@ import { body, param, validationResult } from 'express-validator';
 import { requireRole } from '../middleware/auth.js';
 import aulaService from '../services/aulaService.js';
 import horarioService from '../services/horarioService.js';
+import presencaService from '../services/presencaService.js';
 
 const router = express.Router();
 
@@ -20,6 +21,10 @@ const handleServiceError = (error, res, next) => {
     }
 
     if (error.code === 'AULA_NOT_FOUND') {
+        return res.status(404).json({ message: error.message });
+    }
+
+    if (error.code === 'HORARIO_NOT_FOUND') {
         return res.status(404).json({ message: error.message });
     }
 
@@ -80,6 +85,39 @@ router.get(
                 success: true,
                 count: horarios.length,
                 data: horarios
+            });
+        } catch (error) {
+            return handleServiceError(error, res, next);
+        }
+    }
+);
+
+router.get(
+    '/:aulaId/horarios/:horarioId/alunos',
+    requireRole(['admin', 'dono', 'funcionario']),
+    [
+        param('aulaId').isInt({ min: 1 }),
+        param('horarioId').isInt({ min: 1 })
+    ],
+    async (req, res, next) => {
+        const validationError = handleValidationErrors(req, res);
+        if (validationError) {
+            return validationError;
+        }
+
+        const aulaId = parseInt(req.params.aulaId, 10);
+        const horarioId = parseInt(req.params.horarioId, 10);
+
+        try {
+            const alunos = await presencaService.listAlunosByAulaHorario(
+                aulaId,
+                horarioId,
+                req.user.academiaId
+            );
+            return res.json({
+                success: true,
+                count: alunos.length,
+                data: alunos
             });
         } catch (error) {
             return handleServiceError(error, res, next);

@@ -579,6 +579,42 @@
           "response": []
         },
         {
+          "name": "Listar alunos da aula/horário",
+          "id": "d4e5ab90-ecad-4f68-a76f-3b0aad171e2b",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}",
+                "uuid": "bb4a0c3f-04bf-4ef9-83e5-ef1f8d0b7c57"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "uuid": "3a2a1e4d-a4b5-4b6e-8a17-413c4f8f55e1"
+              }
+            ],
+            "url": {
+              "raw": "{{API_URL}}/aulas/{{AULA_ID}}/horarios/{{HORARIO_ID}}/alunos",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "aulas",
+                "{{AULA_ID}}",
+                "horarios",
+                "{{HORARIO_ID}}",
+                "alunos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Criar horário",
           "id": "fef4b5c9-27a0-4ad0-8ca5-4a090fcef7b2",
           "protocolProfileBehavior": {

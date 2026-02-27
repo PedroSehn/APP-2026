@@ -1,7 +1,3 @@
-CREATE DATABASE academias_gestao 
-
-USE academias_gestao;
-
 CREATE TABLE Academias (
     id INT IDENTITY(1,1) PRIMARY KEY,
     nome NVARCHAR(100) NOT NULL UNIQUE,
@@ -19,15 +15,6 @@ CREATE TABLE Usuarios (
     role NVARCHAR(20) NOT NULL,
     created_at DATETIME2 DEFAULT GETDATE(),
     FOREIGN KEY (academia_id) REFERENCES Academias(id)
-);
-
-CREATE TABLE PlanoAulas (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    plano_id INT NOT NULL,
-    aula_id INT NOT NULL,
-    FOREIGN KEY (plano_id) REFERENCES Planos(id) ON DELETE CASCADE,
-    FOREIGN KEY (aula_id) REFERENCES Aulas(id),
-    CONSTRAINT UX_PlanoAulas_PlanoAula UNIQUE (plano_id, aula_id)
 );
 
 CREATE TABLE Planos (
@@ -58,6 +45,15 @@ CREATE TABLE Horarios (
     capacidade_maxima INT DEFAULT 20,
     FOREIGN KEY (aula_id) REFERENCES Aulas(id),
     FOREIGN KEY (instrutor_id) REFERENCES Usuarios(id)
+);
+
+CREATE TABLE PlanoAulas (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    plano_id INT NOT NULL,
+    aula_id INT NOT NULL,
+    FOREIGN KEY (plano_id) REFERENCES Planos(id) ON DELETE CASCADE,
+    FOREIGN KEY (aula_id) REFERENCES Aulas(id),
+    CONSTRAINT UX_PlanoAulas_PlanoAula UNIQUE (plano_id, aula_id)
 );
 
 CREATE TABLE Assinaturas (
@@ -102,15 +98,7 @@ CREATE TABLE RefreshTokens (
 
 CREATE INDEX IX_RefreshTokens_UserId ON RefreshTokens(user_id);
 
--- Assignments and roles
 ALTER TABLE Academias
     ADD CONSTRAINT FK_Academias_Usuarios_Owner FOREIGN KEY (owner_id) REFERENCES Usuarios(id) ON DELETE SET NULL;
 
 CREATE UNIQUE INDEX UX_Academias_OwnerId ON Academias(owner_id);
-
--- Usuários podem ter quatro papéis diferentes:
---   * `'admin'` controla toda a API;
---   * `'dono'` aparece como `owner_id` em `Academias` e garante os privilégios totais daquela unidade;
---   * `'funcionario'` fica vinculado a uma academia existente (`academia_id`) e tem acesso apenas para leitura/resumo daquele espaço;
---   * `'aluno'` representa membros vinculados (role usada em filtros como os de `alunoService.js`).
--- A coluna `owner_id` em Academias sempre aponta para um usuário com `role = 'dono'`.

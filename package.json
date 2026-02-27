@@ -21,6 +21,7 @@
   "scripts": {
     "dev": "nodemon src/server/server.js",
     "start": "node src/server/server.js",
+    "recreate_database": "node scripts/recreateDatabase.js",
     "test": "mocha --require tests/setup.js \"tests/**/*.test.js\" --exit"
   },
   "type": "module"

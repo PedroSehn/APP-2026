@@ -542,6 +542,185 @@
       "id": "bda11602-9a2a-4d67-aefe-a1b6b542c086"
     },
     {
+      "name": "Horarios",
+      "item": [
+        {
+          "name": "Listar horários da aula",
+          "id": "a1d2fb63-1d2a-4a04-8c4d-abc7b2de9f34",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}",
+                "uuid": "0b0e4f3b-4fcd-4c28-983e-1b0f9a2b4c5d"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "uuid": "72c1c21b-1a98-4183-9c9a-2b1a3343a64d"
+              }
+            ],
+            "url": {
+              "raw": "{{API_URL}}/aulas/{{AULA_ID}}/horarios",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "aulas",
+                "{{AULA_ID}}",
+                "horarios"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Criar horário",
+          "id": "fef4b5c9-27a0-4ad0-8ca5-4a090fcef7b2",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}",
+                "uuid": "b804c6a3-c0fb-4fc2-a2ec-6c0a42c48f87"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "uuid": "675d1d49-1379-4c7d-90d9-6d4b5eadaf7d"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"aulaId\":{{AULA_ID}},\"instrutorId\":{{INSTRUTOR_ID}},\"diaSemana\":2,\"horaInicio\":\"18:30\",\"horaFim\":\"19:30\",\"capacidadeMaxima\":25}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/horarios",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "horarios"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar horário por ID",
+          "id": "d08942c3-1210-4a68-90a4-8d48c9e44e7b",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}",
+                "uuid": "4c4a3f70-3fd8-4e3a-98d8-9d4a6bd8f12b"
+              }
+            ],
+            "url": {
+              "raw": "{{API_URL}}/horarios/{{HORARIO_ID}}",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "horarios",
+                "{{HORARIO_ID}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Alterar horário por ID",
+          "id": "a7c1ee26-9c6a-45b6-9469-5b564f540ae1",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}",
+                "uuid": "e0abe1b9-2db0-4327-bf28-9b7bc12a9845"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "uuid": "0e7c4c5a-7d4e-4313-9b6f-2a0fbad2dfe3"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"horaInicio\":\"19:00\",\"horaFim\":\"20:00\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/horarios/{{HORARIO_ID}}",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "horarios",
+                "{{HORARIO_ID}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar horário por ID",
+          "id": "6fdd0c72-4d5f-4eca-a7b1-12f9c35a9c0d",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}",
+                "uuid": "c1a9f64e-6e29-4ea7-8a34-1b1d1b9a5f31"
+              }
+            ],
+            "url": {
+              "raw": "{{API_URL}}/horarios/{{HORARIO_ID}}",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "horarios",
+                "{{HORARIO_ID}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "534af7ea-7bf5-4f5d-9fcc-3a7fbd7bbd2c"
+    },
+    {
       "name": "Academias",
       "item": [
         {

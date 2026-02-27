@@ -92,9 +92,29 @@ const createUser = async ({ name, email, password, role, academiaId }) => {
     return mapUserRecord(result[0]);
 };
 
+const deleteUser = async (id, academiaId) => {
+    const rows = await db.query(
+        `
+            DELETE FROM Usuarios
+            OUTPUT DELETED.*
+            WHERE id = @id AND academia_id = @academiaId
+        `,
+        { id, academiaId }
+    );
+
+    if (!rows.length) {
+        const error = new Error('Usuário não encontrado');
+        error.code = 'USER_NOT_FOUND';
+        throw error;
+    }
+
+    return mapUserRecord(rows[0]);
+};
+
 const userService = {
     authenticateUser,
     createUser,
+    deleteUser,
     findByEmail: async (email) => {
         const record = await findUserRecordByEmail(email);
         return record ? mapUserRecord(record) : null;

@@ -2,6 +2,7 @@ import express from 'express';
 import { body, param, validationResult } from 'express-validator';
 import { requireRole } from '../middleware/auth.js';
 import aulaService from '../services/aulaService.js';
+import horarioService from '../services/horarioService.js';
 
 const router = express.Router();
 
@@ -56,6 +57,30 @@ router.get(
         try {
             const aula = await aulaService.getAula(id, req.user.academiaId);
             return res.json({ success: true, data: aula });
+        } catch (error) {
+            return handleServiceError(error, res, next);
+        }
+    }
+);
+
+router.get(
+    '/:id/horarios',
+    requireRole(['admin', 'dono', 'funcionario']),
+    [param('id').isInt({ min: 1 })],
+    async (req, res, next) => {
+        const validationError = handleValidationErrors(req, res);
+        if (validationError) {
+            return validationError;
+        }
+
+        const id = parseInt(req.params.id, 10);
+        try {
+            const horarios = await horarioService.listHorariosByAula(id, req.user.academiaId);
+            return res.json({
+                success: true,
+                count: horarios.length,
+                data: horarios
+            });
         } catch (error) {
             return handleServiceError(error, res, next);
         }

@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import userService from '../services/userService.js';
 import refreshTokenService from '../services/refreshTokenService.js';
 import academiaService from '../services/academiaService.js';
+import { authenticate, requireRole } from '../middleware/auth.js';
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -167,6 +168,30 @@ router.post(
             await refreshTokenService.deleteRefreshToken(req.body.refreshToken);
             return res.sendStatus(204);
         } catch (error) {
+            next(error);
+        }
+    }
+);
+
+router.delete(
+    '/delete',
+    authenticate,
+    requireRole(['admin', 'dono']),
+    [body('userId').isInt({ min: 1 })],
+    async (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        const targetUserId = parseInt(req.body.userId, 10);
+        try {
+            await userService.deleteUser(targetUserId, req.user.academiaId);
+            return res.sendStatus(204);
+        } catch (error) {
+            if (error.code === 'USER_NOT_FOUND') {
+                return res.status(404).json({ message: error.message });
+            }
             next(error);
         }
     }

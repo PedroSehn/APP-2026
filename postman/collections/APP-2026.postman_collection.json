@@ -19,8 +19,11 @@
                   "// Supondo que o response venha assim: { \"token\": \"jwt_aqui\" }\r",
                   "const res = pm.response.json();\r",
                   "\r",
-                  "// Salva o token no ambiente\r",
-                  "pm.environment.set(\"JWT_TOKEN\", res.token);\r",
+                "// Salva o token no ambiente\r",
+                "pm.environment.set(\"JWT_TOKEN\", res.token);\r",
+                "if (res.refreshToken) {\r",
+                "  pm.environment.set(\"REFRESH_TOKEN\", res.refreshToken);\r",
+                "}\r",
                   "\r",
                   "// (Opcional) teste de status\r",
                   "pm.test(\"Login 200\", () => {\r",
@@ -61,7 +64,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n      \"email\": \"donotest@example.com\",\n      \"password\": \"strong-password\"\n    }",
+              "raw": "{\n      \"email\": \"admin@recreate.local\",\n      \"password\": \"SenhaForte123!\"\n    }",
               "options": {
                 "raw": {
                   "language": "json"
@@ -98,7 +101,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n      \"refreshToken\": \"828ff64908d9d65ced9c4e622c19a5746fbd4a74e068abdaf9b2e4c843c2afd32a2468fc7bf6d9bb6e5e9806f9391ba2\"\n    }",
+              "raw": "{\n      \"refreshToken\": \"{{REFRESH_TOKEN}}\"\n    }",
               "options": {
                 "raw": {
                   "language": "json"
@@ -135,7 +138,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n      \"name\": \"Dono Teste\",\n      \"email\": \"donotest@example.com\",\n      \"password\": \"strong-password\",\n      \"role\": \"dono\",\n      \"academiaId\": 3\n    }   ",
+              "raw": "{\n      \"name\": \"Dono Reset\",\n      \"email\": \"dono@recreate.local\",\n      \"password\": \"SenhaForte123!\",\n      \"role\": \"dono\",\n      \"academiaId\": 1\n    }",
               "options": {
                 "raw": {
                   "language": "json"
@@ -172,7 +175,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n      \"refreshToken\": \"828ff64908d9d65ced9c4e622c19a5746fbd4a74e068abdaf9b2e4c843c2afd32a2468fc7bf6d9bb6e5e9806f9391ba2\"\n    }",
+              "raw": "{\n      \"refreshToken\": \"{{REFRESH_TOKEN}}\"\n    }",
               "options": {
                 "raw": {
                   "language": "json"
@@ -180,12 +183,10 @@
               }
             },
             "url": {
-              "raw": "http://localhost:3001/auth/refresh",
-              "protocol": "http",
+              "raw": "{{API_URL}}/auth/refresh",
               "host": [
-                "localhost"
+                "{{API_URL}}"
               ],
-              "port": "3001",
               "path": [
                 "auth",
                 "refresh"
@@ -279,7 +280,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMsImVtYWlsIjoiYWRtdGVzdEBleGFtcGxlLmNvbSIsInJvbGUiOiJhZG1pbiIsImFjYWRlbWlhSWQiOjEsImlhdCI6MTc3MTkzNzkyNywiZXhwIjoxNzcxOTQxNTI3fQ.w5rwbfXh0-CdBZ__Q42MzMyo5yHIJXJCtbPhiFa4n7E",
+                "value": "Bearer {{JWT_TOKEN}}",
                 "uuid": "97518832-c439-4dd3-ad24-2e2b9d5d4bd0"
               }
             ],
@@ -307,7 +308,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMsImVtYWlsIjoiYWRtdGVzdEBleGFtcGxlLmNvbSIsInJvbGUiOiJhZG1pbiIsImFjYWRlbWlhSWQiOjEsImlhdCI6MTc3MTkzNzkyNywiZXhwIjoxNzcxOTQxNTI3fQ.w5rwbfXh0-CdBZ__Q42MzMyo5yHIJXJCtbPhiFa4n7E",
+                "value": "Bearer {{JWT_TOKEN}}",
                 "uuid": "7c664c1a-fdbc-461d-8cc4-7add87649212"
               }
             ],
@@ -335,7 +336,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMsImVtYWlsIjoiYWRtdGVzdEBleGFtcGxlLmNvbSIsInJvbGUiOiJhZG1pbiIsImFjYWRlbWlhSWQiOjEsImlhdCI6MTc3MTkzNzkyNywiZXhwIjoxNzcxOTQxNTI3fQ.w5rwbfXh0-CdBZ__Q42MzMyo5yHIJXJCtbPhiFa4n7E",
+                "value": "Bearer {{JWT_TOKEN}}",
                 "uuid": "b0898a57-e87b-4127-bfa4-4c43b5e5e919"
               },
               {
@@ -756,6 +757,159 @@
       ],
       "id": "534af7ea-7bf5-4f5d-9fcc-3a7fbd7bbd2c"
     },
+      {
+        "name": "Presencas",
+        "item": [
+          {
+            "name": "Criar presença",
+            "id": "d4a4a0f3-5c7f-4737-b035-a14e5c07635c",
+            "protocolProfileBehavior": {
+              "disableBodyPruning": true
+            },
+            "request": {
+              "method": "POST",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{JWT_TOKEN}}",
+                  "uuid": "bbb2f4cb-4a6f-49c8-96c3-7ad3d1cb9f2a"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "uuid": "c6f2614c-1d3d-4cfd-9d7d-1fa3e6adf8cb"
+                }
+              ],
+              "body": {
+                "mode": "raw",
+                "raw": "{\"horarioId\":{{HORARIO_ID}},\"aulaId\":{{AULA_ID}},\"dataAula\":\"2026-03-15\",\"alunoId\":{{ALUNO_ID}}}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "{{API_URL}}/presencas",
+                "host": [
+                  "{{API_URL}}"
+                ],
+                "path": [
+                  "presencas"
+                ]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Cancelar presença (aluno)",
+            "id": "c4b3f9e7-8cfd-4f57-95f5-5ae0b8f45202",
+            "protocolProfileBehavior": {
+              "disableBodyPruning": true
+            },
+            "request": {
+              "method": "DELETE",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{JWT_TOKEN}}",
+                  "uuid": "1e2d8baf-5b1d-4b5f-8166-d7ec1588ca39"
+                }
+              ],
+              "url": {
+                "raw": "{{API_URL}}/presencas/{{PRESENCA_ID}}",
+                "host": [
+                  "{{API_URL}}"
+                ],
+                "path": [
+                  "presencas",
+                  "{{PRESENCA_ID}}"
+                ]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Atualizar presença (dono)",
+            "id": "8d5a0c92-5df1-4748-82e6-1c7b3f97c2c4",
+            "protocolProfileBehavior": {
+              "disableBodyPruning": true
+            },
+            "request": {
+              "method": "PATCH",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{JWT_TOKEN}}",
+                  "uuid": "0f7b5c35-4a6e-4cfd-b419-9b4c2ffb6ecf"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "uuid": "a9a560ee-6e2f-473e-b66c-0c9f6c6b5d5c"
+                }
+              ],
+              "body": {
+                "mode": "raw",
+                "raw": "{\"status\":\"cancelada\",\"dataAula\":\"2026-03-16\"}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "{{API_URL}}/presencas/{{PRESENCA_ID}}",
+                "host": [
+                  "{{API_URL}}"
+                ],
+                "path": [
+                  "presencas",
+                  "{{PRESENCA_ID}}"
+                ]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Listar alunos por horário",
+            "id": "91d71ae2-5f05-4f88-aba0-b8f6d6a6e7f9",
+            "protocolProfileBehavior": {
+              "disableBodyPruning": true
+            },
+            "request": {
+              "method": "GET",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{JWT_TOKEN}}",
+                  "uuid": "a8ca415f-6250-4505-8b76-255ea17b50f9"
+                }
+              ],
+              "url": {
+                "raw": "{{API_URL}}/presencas/horarios/{{HORARIO_ID}}/alunos?aulaId={{AULA_ID}}",
+                "host": [
+                  "{{API_URL}}"
+                ],
+                "path": [
+                  "presencas",
+                  "horarios",
+                  "{{HORARIO_ID}}",
+                  "alunos"
+                ],
+                "query": [
+                  {
+                    "key": "aulaId",
+                    "value": "{{AULA_ID}}"
+                  }
+                ]
+              }
+            },
+            "response": []
+          }
+        ],
+        "id": "f3c29c8f-4ec5-4928-af37-2739e3231c1f"
+      },
     {
       "name": "Academias",
       "item": [
@@ -770,7 +924,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMsImVtYWlsIjoiYWRtdGVzdEBleGFtcGxlLmNvbSIsInJvbGUiOiJhZG1pbiIsImFjYWRlbWlhSWQiOjEsImlhdCI6MTc3MTg0MDczOSwiZXhwIjoxNzcxODQ0MzM5fQ.CrjXHZQlwsQ_D8qBrSSNjzYS2g5jk_MfFydPFXHlO3o",
+                "value": "Bearer {{JWT_TOKEN}}",
                 "uuid": "f1326cf3-c59e-462c-a624-f1ffe129d417"
               }
             ],
@@ -799,7 +953,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMsImVtYWlsIjoiYWRtdGVzdEBleGFtcGxlLmNvbSIsInJvbGUiOiJhZG1pbiIsImFjYWRlbWlhSWQiOjEsImlhdCI6MTc3MTg0MDczOSwiZXhwIjoxNzcxODQ0MzM5fQ.CrjXHZQlwsQ_D8qBrSSNjzYS2g5jk_MfFydPFXHlO3o",
+                "value": "Bearer {{JWT_TOKEN}}",
                 "uuid": "d962a0b6-586c-48ef-b674-08780fd55642"
               }
             ],
@@ -829,7 +983,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMsImVtYWlsIjoiYWRtdGVzdEBleGFtcGxlLmNvbSIsInJvbGUiOiJhZG1pbiIsImFjYWRlbWlhSWQiOjEsImlhdCI6MTc3MTg0MDczOSwiZXhwIjoxNzcxODQ0MzM5fQ.CrjXHZQlwsQ_D8qBrSSNjzYS2g5jk_MfFydPFXHlO3o",
+                "value": "Bearer {{JWT_TOKEN}}",
                 "uuid": "79ef6512-2f68-4f1e-894b-3c2d1f1efd6e"
               },
               {
@@ -873,7 +1027,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMsImVtYWlsIjoiYWRtdGVzdEBleGFtcGxlLmNvbSIsInJvbGUiOiJhZG1pbiIsImFjYWRlbWlhSWQiOjEsImlhdCI6MTc3MTg0MDczOSwiZXhwIjoxNzcxODQ0MzM5fQ.CrjXHZQlwsQ_D8qBrSSNjzYS2g5jk_MfFydPFXHlO3o",
+                "value": "Bearer {{JWT_TOKEN}}",
                 "uuid": "85fa8011-5d81-4463-84aa-dee54308d5cd"
               },
               {
@@ -1096,7 +1250,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"nome\":\"Plano Base\",\"valor\":49.9,\"descricao\":\"Auas 3 vezes na semana\"}",
+              "raw": "{\"nome\":\"Plano Base\",\"valor\":49.9,\"descricao\":\"Auas 3 vezes na semana\",\"maxAulasPorSemana\":3}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1139,6 +1293,111 @@
               "path": [
                 "owner",
                 "planos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar aulas do plano",
+          "id": "d3d3c8b2-5e9a-44e8-a638-bc6b60f1f4a1",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}",
+                "uuid": "d7759c7d-6a1b-4c5b-b7a5-3c5dae827cda"
+              }
+            ],
+            "url": {
+              "raw": "{{API_URL}}/owner/planos/{{PLANO_ID}}/aulas",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "owner",
+                "planos",
+                "{{PLANO_ID}}",
+                "aulas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Adicionar aula ao plano",
+          "id": "f1858994-8d40-4afb-955f-dce0817b0d65",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "uuid": "62c5e0a7-1d98-4abb-8c54-3c2d1c1de7e6"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}",
+                "uuid": "3ec6b6c5-5124-4c8e-8cf9-6087a3d68f64"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"aulaId\":{{AULA_ID}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/owner/planos/{{PLANO_ID}}/aulas",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "owner",
+                "planos",
+                "{{PLANO_ID}}",
+                "aulas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Remover aula do plano",
+          "id": "c2196c5b-6fcb-4d82-9f9a-1f3c8d1578e4",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}",
+                "uuid": "9f3134e9-a5d4-4d95-9e7f-b46451ac2b12"
+              }
+            ],
+            "url": {
+              "raw": "{{API_URL}}/owner/planos/{{PLANO_ID}}/aulas/{{AULA_ID}}",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "owner",
+                "planos",
+                "{{PLANO_ID}}",
+                "aulas",
+                "{{AULA_ID}}"
               ]
             }
           },

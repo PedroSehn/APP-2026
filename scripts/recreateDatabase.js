@@ -69,13 +69,12 @@ const runSchema = async () => {
 const formatDate = (date) => date.toISOString().split('T')[0];
 
 const seedDatabase = async (request, dbInstance) => {
-    const timestamp = Date.now();
     const password = process.env.RECREATE_DB_PASSWORD || 'SenhaForte123!';
     const emails = {
-        admin: `admin+${timestamp}@recreate.local`,
-        owner: `dono+${timestamp}@recreate.local`,
-        funcionario: `funcionario+${timestamp}@recreate.local`,
-        aluno: `aluno+${timestamp}@recreate.local`
+        admin: process.env.RECREATE_ADMIN_EMAIL || 'admin@recreate.local',
+        owner: process.env.RECREATE_OWNER_EMAIL || 'dono@recreate.local',
+        funcionario: process.env.RECREATE_FUNCIONARIO_EMAIL || 'funcionario@recreate.local',
+        aluno: process.env.RECREATE_ALUNO_EMAIL || 'aluno@recreate.local'
     };
 
     console.log('\n🎯 Iniciando seed via rotas');
@@ -85,10 +84,9 @@ const seedDatabase = async (request, dbInstance) => {
         .expect(201);
 
     const adminToken = admin.body.token;
-    const suffix = String(timestamp).slice(-3).padStart(3, '0');
     const academyPayload = {
-        nome: `Academia Reset ${timestamp}`,
-        cnpj: `12.345.${suffix}/0001-99`
+        nome: process.env.RECREATE_ACADEMIA_NOME || 'Academia Reset',
+        cnpj: process.env.RECREATE_ACADEMIA_CNPJ || '12.345.678/0001-91'
     };
 
     const academy = await request

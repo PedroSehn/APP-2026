@@ -906,6 +906,63 @@
               }
             },
             "response": []
+          },
+          {
+            "name": "Minhas presenças (aluno)",
+            "id": "7a4f8c6f-5d30-4d70-9371-9f8a0e2c4bd2",
+            "protocolProfileBehavior": {
+              "disableBodyPruning": true
+            },
+            "request": {
+              "method": "GET",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{JWT_TOKEN}}",
+                  "uuid": "d92b0f8b-4ca4-4df0-9ede-3f9acde3b9dd"
+                }
+              ],
+              "url": {
+                "raw": "{{API_URL}}/presencas/minhas",
+                "host": [
+                  "{{API_URL}}"
+                ],
+                "path": [
+                  "presencas",
+                  "minhas"
+                ]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Presenças de aluno (dono)",
+            "id": "5b3c8d2d-23e6-4a0e-9f5d-88c5d3c3aedc",
+            "protocolProfileBehavior": {
+              "disableBodyPruning": true
+            },
+            "request": {
+              "method": "GET",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{JWT_TOKEN}}",
+                  "uuid": "fa8c9d3e-1bda-4452-9d6f-0a5c6d40c2b9"
+                }
+              ],
+              "url": {
+                "raw": "{{API_URL}}/presencas/alunos/{{ALUNO_ID}}",
+                "host": [
+                  "{{API_URL}}"
+                ],
+                "path": [
+                  "presencas",
+                  "alunos",
+                  "{{ALUNO_ID}}"
+                ]
+              }
+            },
+            "response": []
           }
         ],
         "id": "f3c29c8f-4ec5-4928-af37-2739e3231c1f"
@@ -1292,6 +1349,33 @@
               ],
               "path": [
                 "owner",
+                "planos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar planos (alunos)",
+          "id": "96df8078-7155-4d7f-9b1f-9abde1529c5a",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}",
+                "uuid": "ab12cd34-56ef-78gh-90ij-klmnopqrstuv"
+              }
+            ],
+            "url": {
+              "raw": "{{API_URL}}/planos",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
                 "planos"
               ]
             }

@@ -24,6 +24,8 @@ CREATE TABLE Planos (
     valor DECIMAL(10,2) NOT NULL,
     descricao NVARCHAR(255) NULL,
     max_aulas_por_semana INT NOT NULL DEFAULT 0,
+    duracao_meses INT NOT NULL DEFAULT 1,
+    recorrente BIT NOT NULL DEFAULT 1,
     FOREIGN KEY (academia_id) REFERENCES Academias(id)
 );
 
@@ -61,6 +63,8 @@ CREATE TABLE Assinaturas (
     aluno_id INT NOT NULL,
     plano_id INT NOT NULL,
     data_inicio DATETIME2 NOT NULL,
+    duracao_meses INT NOT NULL DEFAULT 1,
+    recorrente BIT NOT NULL DEFAULT 1,
     status NVARCHAR(20) NOT NULL,
     FOREIGN KEY (aluno_id) REFERENCES Usuarios(id),
     FOREIGN KEY (plano_id) REFERENCES Planos(id)

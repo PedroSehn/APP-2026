@@ -32,6 +32,7 @@ Defina em um `.env`:
 - `POST /auth/login` – valida credenciais e retorna `{ token, expiresIn, user }`.
 - `GET /academias` – protegido; exige token JWT válido e role `admin` para listar academias. As listas incluem `owner_id`, enquanto rotas com controle de dono verificam `role = 'dono'` e `Academias.owner_id` para garantir que apenas o proprietário manipule seus dados.
 - `POST /assinaturas` – protegido; só `admin` e `dono` podem abrir novas assinaturas (`alunoId`, `planoId`, `dataInicio` obrigatórios). O serviço garante que o aluno/plano pertencem à mesma academia, que não haja outra assinatura `ATIVA` para o aluno, normaliza os status para letras maiúsculas e cria automaticamente a primeira `Faturas` usando o valor do plano (`status` padrão `ATIVA`, `faturaStatus` padrão `PENDENTE`, `dataVencimento = dataInicio` ou override informado).
+- `POST /assinaturas/:id/cancel` – permite que alunos cancelem a recorrência. Planos mensais só podem ser cancelados se a próxima fatura ainda não vence (data_vencimento >= hoje); o cancelamento desativa `recorrente` e impede que o plano renove no fim do ciclo atual.
 - `/alunos` – GET/GET por ID pode ser dirigido tanto por `dono` quanto por `funcionario` para revisar alunos atrelados à academia do mesmo `academiaId`. POST/PUT/DELETE continuam restritos ao `dono`.
 - `/aulas` – CRUD protegido por JWT e `requireRole(['admin', 'dono'])`. `GET /aulas` e `GET /aulas/:id` consultam apenas aulas da academia do token, enquanto `POST`, `PUT` e `DELETE` aceitam `nome` obrigatório e `descricao` opcional para criar/atualizar registros do mesmo `academiaId`.
 - `GET /health` – rota pública para verificar saúde da API.
@@ -52,6 +53,7 @@ Defina em um `.env`:
 - `GET /owner/planos` retorna os planos da academia do dono (`req.user.academiaId`) em `{ success, count, data }`.
 - Cada plano no retorno inclui `maxAulasPorSemana` e um array `aulas` com `{ id, nome, descricao }`, permitindo entender quais aulas aquele plano permite. As vezes também expõe `descricao` e `valor` para contextualizar a oferta.
 - `POST /owner/planos` cria um novo plano (`nome`, `valor`, `descricao?`) e dispara `409` caso já exista um plano com o mesmo nome na academia.
+- Cada plano do dono agora inclui `duracaoMeses` (1, 3, 6 ou 12) e a flag `recorrente`; rotas de criação/atualização expõem esses campos para controlar os ciclos e permitir que assinaturas recorrentes parem de renovar mas permaneçam ativas até o fim do período em andamento.
 - `GET /owner/dashboard/pending-subscriptions` lista assinaturas pendentes e vencidas por padrão (limit 25, offset 0, max 100) e aceita `limit/offset` como query params para paginação; cada item inclui fatura, assinatura, plano e aluno relacionados.
 - `GET /owner/dashboard/faturas` permite filtrar por `status`, `month`, `year`, `limit`, `offset` para revisar cobranças e traz metadados da assinatura/aluno.
 - `GET /owner/faturas` oferece filtros idênticos (`status`, `month`, `year`, `limit`, `offset`) para donos/admins listarem faturas de toda a academia; reutiliza `dashboardService.listInvoices`.

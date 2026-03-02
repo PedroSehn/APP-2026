@@ -1606,6 +1606,79 @@
           },
           "response": []
         }
+          ,
+          {
+            "name": "Renovar Assinatura (admin/dono)",
+            "id": "f3d5a2b9-1c3e-4b5a-bc3d-8e9f1a2b3c4d",
+            "protocolProfileBehavior": {
+              "disableBodyPruning": true
+            },
+            "request": {
+              "method": "POST",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "uuid": "d1e2f3a4-b5c6-7890-abcd-ef1234567890"
+                },
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{JWT_TOKEN}}",
+                  "uuid": "a1b2c3d4-e5f6-7890-abcd-1234567890ab"
+                }
+              ],
+              "body": {
+                "mode": "raw",
+                "raw": "{\"dataInicio\":\"2026-05-01\",\"dataVencimento\":\"2026-06-01\",\"faturaStatus\":\"pendente\"}",
+                "options": {
+                  "raw": {
+                    "language": "json"
+                  }
+                }
+              },
+              "url": {
+                "raw": "{{API_URL}}/assinaturas/{{ASSINATURA_ID}}/renew",
+                "host": [
+                  "{{API_URL}}"
+                ],
+                "path": [
+                  "assinaturas",
+                  "{{ASSINATURA_ID}}",
+                  "renew"
+                ]
+              }
+            },
+            "response": []
+          },
+          {
+            "name": "Cancelar Assinatura (aluno)",
+            "id": "b4c5d6e7-f8a9-0b1c-2d3e-4f5a6b7c8d9e",
+            "protocolProfileBehavior": {
+              "disableBodyPruning": true
+            },
+            "request": {
+              "method": "POST",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{JWT_TOKEN}}",
+                  "uuid": "0a1b2c3d-4e5f-6789-abcd-ef0123456789"
+                }
+              ],
+              "url": {
+                "raw": "{{API_URL}}/assinaturas/{{ASSINATURA_ID}}/cancel",
+                "host": [
+                  "{{API_URL}}"
+                ],
+                "path": [
+                  "assinaturas",
+                  "{{ASSINATURA_ID}}",
+                  "cancel"
+                ]
+              }
+            },
+            "response": []
+          }
       ],
       "id": "e7a3b2c1-d4f5-6789-abcd-ef0123456789"
     }

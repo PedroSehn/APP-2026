@@ -21,6 +21,8 @@ Servir de contexto para a equipe: a base é uma API em Node.js que dá suporte �
 - `Academias` (`id`, `nome`, `cnpj`, `owner_id`, `created_at`), onde cada `owner_id` aponta para um usuário com `role = 'dono'`.
 - `Usuarios` (`academia_id`, `nome`, `email`, `password_hash`, `role`, `created_at`) com `academia_id` opcional e `role` indicando `admin`, `aluno`, `funcionario` ou `dono`; apenas o `dono` pode ser referenciado em `Academias.owner_id`, enquanto `funcionario` usa `academia_id` para leitura restrita.
 - `Planos`, `Aulas`, `Horarios`, `Assinaturas`, `Faturas` e `Presencas` com as chaves estrangeiras necessárias para relacionar usuários, academias, planos, aulas e presenças.
+- Para cada plano definimos `duracaoMeses` (1, 3, 6 ou 12) e uma flag `recorrente` que controla se ele deveria gerar renovação automática; o dono pode ajustar esses campos via `/owner/planos` e qualquer assinatura criada herda essa duração.
+- Assinaturas recorrentes podem ser canceladas pelos alunos apenas desativando o `recorrente` no final do ciclo corrente; assinaturas mensais exigem que a fatura a vencer ainda não tenha expirado para bloquear o cancelamento.
 
 ## 🧰 CONVENÇÕES E PADRÕES
 - `db.query(sql, params)` usa `request.input()` para evitar SQL injection; mantenha essa abordagem ao adicionar queries.

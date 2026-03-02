@@ -142,7 +142,9 @@ const seedDatabase = async (request, dbInstance) => {
             nome: 'Plano Reset Teste',
             valor: 199.9,
             descricao: 'Plano criado para testes automatizados',
-            maxAulasPorSemana: 3
+            maxAulasPorSemana: 3,
+            duracaoMeses: 3,
+            recorrente: true
         })
         .expect(201);
 
@@ -177,14 +179,16 @@ const seedDatabase = async (request, dbInstance) => {
     const assinaturaInsertDate = new Date();
     const [assinaturaInserted] = await dbInstance.query(
         `
-            INSERT INTO Assinaturas (aluno_id, plano_id, data_inicio, status)
+            INSERT INTO Assinaturas (aluno_id, plano_id, data_inicio, status, duracao_meses, recorrente)
             OUTPUT INSERTED.*
-            VALUES (@alunoId, @planoId, @dataInicio, 'ativa')
+            VALUES (@alunoId, @planoId, @dataInicio, 'ativa', @duracaoMeses, @recorrente)
         `,
         {
             alunoId,
             planoId: plano.body.data.id,
-            dataInicio: assinaturaInsertDate
+            dataInicio: assinaturaInsertDate,
+            duracaoMeses: plano.body.data.duracaoMeses ?? 1,
+            recorrente: plano.body.data.recorrente ? 1 : 0
         }
     );
     const faturaDueDate = formatDate(assinaturaInsertDate);

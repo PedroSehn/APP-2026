@@ -137,4 +137,103 @@ describe('dashboardService', () => {
             })
         );
     });
+
+    it('lists invoices for an aluno with filters', async () => {
+        const rows = [
+            {
+                faturaId: 5,
+                valor: '120.00',
+                dataVencimento: '2025-06-01',
+                dataPagamento: null,
+                faturaStatus: 'PENDENTE',
+                assinaturaId: 2,
+                assinaturaStatus: 'ATIVA',
+                planoId: 1,
+                planoNome: 'Plano Teste',
+                planoDescricao: 'desc',
+                alunoId: 3,
+                alunoNome: 'Aluno Teste',
+                alunoEmail: 'aluno@example.com'
+            }
+        ];
+        const queryStub = sinon.stub(db, 'query').resolves(rows);
+
+        const invoices = await dashboardService.listAlunoFaturas({
+            academiaId: 7,
+            alunoId: 3,
+            status: 'PENDENTE',
+            month: 6,
+            year: 2025,
+            limit: 10,
+            offset: 1
+        });
+
+        expect(invoices).to.deep.equal([
+            {
+                faturaId: 5,
+                faturaStatus: 'PENDENTE',
+                valor: 120,
+                dataVencimento: '2025-06-01',
+                dataPagamento: null,
+                assinaturaId: 2,
+                assinaturaStatus: 'ATIVA',
+                planoId: 1,
+                planoNome: 'Plano Teste',
+                planoDescricao: 'desc',
+                alunoId: 3,
+                alunoNome: 'Aluno Teste',
+                alunoEmail: 'aluno@example.com'
+            }
+        ]);
+        sinon.assert.calledWithMatch(
+            queryStub,
+            sinon.match.string,
+            sinon.match({
+                academiaId: 7,
+                alunoId: 3,
+                statusFilter: 'PENDENTE',
+                monthFilter: 6,
+                yearFilter: 2025,
+                limit: 10,
+                offset: 1
+            })
+        );
+    });
+
+    it('updates fatura status and payment date', async () => {
+        const rows = [
+            {
+                faturaId: 99,
+                valor: '250.00',
+                dataVencimento: '2025-02-01',
+                dataPagamento: '2025-02-10',
+                faturaStatus: 'PAGO',
+                assinaturaId: 8,
+                assinaturaStatus: 'ATIVA',
+                planoId: 2,
+                planoNome: 'Plano Teste',
+                planoDescricao: 'desc',
+                alunoId: 4,
+                alunoNome: 'Aluno Teste',
+                alunoEmail: 'aluno@example.com'
+            }
+        ];
+        const queryStub = sinon.stub(db, 'query').resolves(rows);
+
+        const updated = await dashboardService.updateFaturaStatus({
+            faturaId: 99,
+            academiaId: 4,
+            status: 'pago',
+            dataPagamento: '2025-02-10'
+        });
+
+        expect(updated.faturaStatus).to.equal('PAGO');
+        expect(updated.dataPagamento).to.equal('2025-02-10');
+        sinon.assert.calledWithMatch(queryStub, sinon.match.string, {
+            faturaId: 99,
+            academiaId: 4,
+            status: 'PAGO',
+            dataPagamento: '2025-02-10'
+        });
+    });
 });

@@ -366,6 +366,76 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Meu perfil (aluno)",
+          "id": "a1122334-5566-7788-99aa-bbccddeeff00",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}",
+                "uuid": "22334455-6677-8899-aabb-ccddeeff0011"
+              }
+            ],
+            "url": {
+              "raw": "{{API_URL}}/alunos/me",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "alunos",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar meu perfil (aluno)",
+          "id": "bbccbbaa-9988-7766-5544-33221100ffe0",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}",
+                "uuid": "33445566-7788-99aa-bbcc-ddeeff001122"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "uuid": "44455566-7788-99aa-bbcc-ddeeff112233"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Meu Novo Nome\",\"email\":\"meuemail@academia.com\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/alunos/me",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "alunos",
+                "me"
+              ]
+            }
+          },
+          "response": []
         }
       ],
       "id": "ce1389e3-d4d9-4bba-81f8-2abed7ed0684"

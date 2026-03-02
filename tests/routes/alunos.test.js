@@ -29,6 +29,13 @@ describe('Alunos route', () => {
         academiaId: 10
     };
     const funcionarioToken = jwt.sign(funcionarioPayload, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const alunoPayload = {
+        sub: 5,
+        email: 'aluno@example.com',
+        role: 'aluno',
+        academiaId: 10
+    };
+    const alunoToken = jwt.sign(alunoPayload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     it('lists alunos scoped to academia', async () => {
         const alunos = [
@@ -202,5 +209,78 @@ describe('Alunos route', () => {
 
         expect(response.status).to.equal(404);
         expect(response.body).to.have.property('message', notFoundError.message);
+    });
+
+    it('allows aluno to view their own profile', async () => {
+        const aluno = { id: 5, name: 'Aluno G', email: 'g@g.com', role: 'aluno', academiaId: 10 };
+        sinon.stub(alunoService, 'getAluno').resolves(aluno);
+
+        const response = await request(app)
+            .get('/alunos/me')
+            .set('Authorization', `Bearer ${alunoToken}`);
+
+        expect(response.status).to.equal(200);
+        expect(response.body).to.deep.equal({ success: true, data: aluno });
+    });
+
+    it('returns 404 when aluno profile is missing', async () => {
+        const notFoundError = new Error('Aluno não encontrado');
+        notFoundError.code = 'ALUNO_NOT_FOUND';
+        sinon.stub(alunoService, 'getAluno').rejects(notFoundError);
+
+        const response = await request(app)
+            .get('/alunos/me')
+            .set('Authorization', `Bearer ${alunoToken}`);
+
+        expect(response.status).to.equal(404);
+        expect(response.body).to.have.property('message', notFoundError.message);
+    });
+
+    it('allows aluno to update their profile', async () => {
+        const patch = { name: 'Aluno Atualizado' };
+        const updated = { id: 5, name: patch.name, email: 'g@g.com', role: 'aluno', academiaId: 10 };
+        sinon.stub(alunoService, 'updateAluno').resolves(updated);
+
+        const response = await request(app)
+            .put('/alunos/me')
+            .send(patch)
+            .set('Authorization', `Bearer ${alunoToken}`);
+
+        expect(response.status).to.equal(200);
+        expect(response.body).to.deep.equal({ success: true, data: updated });
+    });
+
+    it('rejects aluno update with no fields', async () => {
+        const response = await request(app)
+            .put('/alunos/me')
+            .send({})
+            .set('Authorization', `Bearer ${alunoToken}`);
+
+        expect(response.status).to.equal(400);
+        expect(response.body).to.have.property('message');
+    });
+
+    it('propagates not-found when aluno update target is missing', async () => {
+        const notFoundError = new Error('Aluno não encontrado');
+        notFoundError.code = 'ALUNO_NOT_FOUND';
+        sinon.stub(alunoService, 'updateAluno').rejects(notFoundError);
+
+        const response = await request(app)
+            .put('/alunos/me')
+            .send({ name: 'Novo Nome' })
+            .set('Authorization', `Bearer ${alunoToken}`);
+
+        expect(response.status).to.equal(404);
+        expect(response.body).to.have.property('message', notFoundError.message);
+    });
+
+    it('rejects aluno update when password is provided', async () => {
+        const response = await request(app)
+            .put('/alunos/me')
+            .send({ password: 'novaSenha123' })
+            .set('Authorization', `Bearer ${alunoToken}`);
+
+        expect(response.status).to.equal(400);
+        expect(response.body).to.have.property('message').that.includes('senha');
     });
 });

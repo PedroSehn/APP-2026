@@ -1383,6 +1383,77 @@
           "response": []
         },
         {
+          "name": "Meu plano (aluno)",
+          "id": "d0c5fe3a-9b2b-4d50-8dab-9d5f0b0d7c4e",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}",
+                "uuid": "f1a2b3c4-5d6e-7a8b-9c0d-ef1234567890"
+              }
+            ],
+            "url": {
+              "raw": "{{API_URL}}/planos/meu",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "planos",
+                "meu"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Alterar plano do aluno (admin/dono)",
+          "id": "e51cd2b3-7baa-4da7-bf49-56ec05c2f3ae",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "uuid": "c5d7e8b9-a4bc-4320-97e2-1cf978dfb4f5"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}",
+                "uuid": "f2b3c4d5-6e7f-8091-0a2b-3c4d5e6f7a8b"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"planoId\":{{PLANO_ID}}}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/planos/alunos/{{ALUNO_ID}}",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "planos",
+                "alunos",
+                "{{ALUNO_ID}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Listar aulas do plano",
           "id": "d3d3c8b2-5e9a-44e8-a638-bc6b60f1f4a1",
           "protocolProfileBehavior": {

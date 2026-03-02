@@ -52,14 +52,50 @@ const mapPlanoRecord = (record) => ({
 const listPlanos = async (academiaId) => {
     const rows = await db.query(
         `
-            SELECT id, academia_id, nome, valor, descricao, max_aulas_por_semana
-            FROM Planos
-            WHERE academia_id = @academiaId
-            ORDER BY nome
+            SELECT
+                p.id,
+                p.academia_id,
+                p.nome,
+                p.valor,
+                p.descricao,
+                p.max_aulas_por_semana,
+                a.id AS aula_id,
+                a.nome AS aula_nome,
+                a.descricao AS aula_descricao
+            FROM Planos p
+            LEFT JOIN PlanoAulas pa ON pa.plano_id = p.id
+            LEFT JOIN Aulas a ON a.id = pa.aula_id AND a.academia_id = @academiaId
+            WHERE p.academia_id = @academiaId
+            ORDER BY p.nome, a.nome
         `,
         { academiaId }
     );
-    return rows.map(mapPlanoRecord);
+
+    const planosMap = new Map();
+    rows.forEach((record) => {
+        const existingPlano = planosMap.get(record.id);
+        if (!existingPlano) {
+            planosMap.set(record.id, {
+                id: record.id,
+                academiaId: record.academia_id,
+                nome: record.nome,
+                valor: Number(record.valor),
+                descricao: record.descricao,
+                maxAulasPorSemana: record.max_aulas_por_semana,
+                aulas: []
+            });
+        }
+
+        if (record.aula_id) {
+            planosMap.get(record.id).aulas.push({
+                id: record.aula_id,
+                nome: record.aula_nome,
+                descricao: record.aula_descricao
+            });
+        }
+    });
+
+    return Array.from(planosMap.values());
 };
 
 const getPlanoById = async (id, academiaId) => {
@@ -267,6 +303,56 @@ const removeAulaFromPlano = async (planoId, aulaId, academiaId) => {
     return rows[0];
 };
 
+
+const ensureAlunoHasPlano = async (alunoId, academiaId) => {
+    const rows = await db.query(
+        `
+            SELECT a.*
+            FROM Assinaturas a
+            INNER JOIN Planos p ON a.plano_id = p.id
+            WHERE a.aluno_id = @alunoId
+              AND p.academia_id = @academiaId
+              AND a.status = 'ativa'
+        `,
+        { alunoId, academiaId }
+    );
+
+    if (!rows.length) {
+        const error = new Error('Assinatura ativa não encontrada para este aluno');
+        error.code = 'ASSINATURA_NOT_FOUND';
+        throw error;
+    }
+
+    return rows[0];
+};
+
+const reassignAlunoPlano = async (alunoId, academiaId, planoId) => {
+    const assinatura = await ensureAlunoHasPlano(alunoId, academiaId);
+    await ensurePlanoBelongsToAcademia(planoId, academiaId);
+
+    const rows = await db.query(
+        `
+            UPDATE a
+            SET plano_id = @planoId
+            OUTPUT INSERTED.*
+            FROM Assinaturas a
+            INNER JOIN Planos p ON a.plano_id = p.id
+            WHERE a.id = @assinaturaId AND p.academia_id = @academiaId
+        `,
+        {
+            planoId,
+            assinaturaId: assinatura.id,
+            academiaId
+        }
+    );
+
+    if (!rows.length) {
+        throw new Error('Falha ao atualizar assinatura');
+    }
+
+    return rows[0];
+};
+
 const planoService = {
     listPlanos,
     getPlanoById,
@@ -275,10 +361,13 @@ const planoService = {
     deletePlano
 };
 
-export default planoService;
 export {
     ensurePlanoPermiteAula,
     listPlanoAulas,
     addAulaToPlano,
-    removeAulaFromPlano
+    removeAulaFromPlano,
+    reassignAlunoPlano
 };
+
+export default planoService;
+

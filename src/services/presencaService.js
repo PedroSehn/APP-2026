@@ -95,7 +95,12 @@ const getAlunoPlano = async (alunoId, academiaId) => {
         `
             SELECT TOP 1
                 a.id AS assinatura_id,
+                a.data_inicio,
+                a.status AS assinatura_status,
                 p.id AS plano_id,
+                p.nome AS plano_nome,
+                p.valor AS plano_valor,
+                p.descricao AS plano_descricao,
                 p.max_aulas_por_semana
             FROM Assinaturas a
             INNER JOIN Planos p ON a.plano_id = p.id
@@ -436,4 +441,4 @@ const presencaService = {
 };
 
 export default presencaService;
-export { getAulasByAluno };
+export { getAulasByAluno, getAlunoPlano };

@@ -9,20 +9,81 @@ describe('planoService', () => {
         sinon.restore();
     });
 
-    it('lists planos scoped to academia', async () => {
-        const rows = [{ id: 1, academia_id: 4, nome: 'Plano A', valor: '120.50', descricao: 'desc' }];
+    it('lists planos scoped to academia with aulas', async () => {
+        const rows = [
+            {
+                id: 1,
+                academia_id: 4,
+                nome: 'Plano A',
+                valor: '120.50',
+                descricao: 'desc',
+                max_aulas_por_semana: 2,
+                aula_id: 11,
+                aula_nome: 'Yoga',
+                aula_descricao: 'Relaxante'
+            },
+            {
+                id: 1,
+                academia_id: 4,
+                nome: 'Plano A',
+                valor: '120.50',
+                descricao: 'desc',
+                max_aulas_por_semana: 2,
+                aula_id: 12,
+                aula_nome: 'Pilates',
+                aula_descricao: 'Fortalecimento'
+            },
+            {
+                id: 2,
+                academia_id: 4,
+                nome: 'Plano B',
+                valor: '199.00',
+                descricao: 'premium',
+                max_aulas_por_semana: 0,
+                aula_id: null,
+                aula_nome: null,
+                aula_descricao: null
+            }
+        ];
         const queryStub = sinon.stub(db, 'query').resolves(rows);
 
         const planos = await planoService.listPlanos(4);
 
         expect(planos).to.deep.equal([
-            { id: 1, academiaId: 4, nome: 'Plano A', valor: 120.5, descricao: 'desc' }
+            {
+                id: 1,
+                academiaId: 4,
+                nome: 'Plano A',
+                valor: 120.5,
+                descricao: 'desc',
+                maxAulasPorSemana: 2,
+                aulas: [
+                    { id: 11, nome: 'Yoga', descricao: 'Relaxante' },
+                    { id: 12, nome: 'Pilates', descricao: 'Fortalecimento' }
+                ]
+            },
+            {
+                id: 2,
+                academiaId: 4,
+                nome: 'Plano B',
+                valor: 199,
+                descricao: 'premium',
+                maxAulasPorSemana: 0,
+                aulas: []
+            }
         ]);
         sinon.assert.calledWithMatch(queryStub, sinon.match.string, { academiaId: 4 });
     });
 
     it('creates a new plano', async () => {
-        const inserted = { id: 2, academia_id: 5, nome: 'Plano B', valor: '199.00', descricao: 'premium' };
+        const inserted = {
+            id: 2,
+            academia_id: 5,
+            nome: 'Plano B',
+            valor: '199.00',
+            descricao: 'premium',
+            max_aulas_por_semana: 0
+        };
         const queryStub = sinon.stub(db, 'query').resolves([inserted]);
 
         const plano = await planoService.createPlano({ academiaId: 5, nome: 'Plano B', valor: 199, descricao: 'premium' });
@@ -32,7 +93,8 @@ describe('planoService', () => {
             academiaId: 5,
             nome: 'Plano B',
             valor: 199,
-            descricao: 'premium'
+            descricao: 'premium',
+            maxAulasPorSemana: 0
         });
         sinon.assert.calledWithMatch(queryStub, sinon.match.string, {
             academiaId: 5,
@@ -43,7 +105,14 @@ describe('planoService', () => {
     });
 
     it('updates an existing plano', async () => {
-        const updated = { id: 3, academia_id: 6, nome: 'Super Plano', valor: '220.00', descricao: 'nova' };
+        const updated = {
+            id: 3,
+            academia_id: 6,
+            nome: 'Super Plano',
+            valor: '220.00',
+            descricao: 'nova',
+            max_aulas_por_semana: 5
+        };
         const queryStub = sinon.stub(db, 'query').resolves([updated]);
 
         const plano = await planoService.updatePlano(3, 6, { nome: 'Super Plano', valor: 220, descricao: 'nova' });
@@ -53,7 +122,8 @@ describe('planoService', () => {
             academiaId: 6,
             nome: 'Super Plano',
             valor: 220,
-            descricao: 'nova'
+            descricao: 'nova',
+            maxAulasPorSemana: 5
         });
         sinon.assert.calledWithMatch(queryStub, sinon.match.string, {
             id: 3,
@@ -65,7 +135,14 @@ describe('planoService', () => {
     });
 
     it('deletes a plano', async () => {
-        const deleted = { id: 4, academia_id: 7, nome: 'Removido', valor: '100.00', descricao: 'old' };
+        const deleted = {
+            id: 4,
+            academia_id: 7,
+            nome: 'Removido',
+            valor: '100.00',
+            descricao: 'old',
+            max_aulas_por_semana: 1
+        };
         const queryStub = sinon.stub(db, 'query').resolves([deleted]);
 
         const plano = await planoService.deletePlano(4, 7);
@@ -75,7 +152,8 @@ describe('planoService', () => {
             academiaId: 7,
             nome: 'Removido',
             valor: 100,
-            descricao: 'old'
+            descricao: 'old',
+            maxAulasPorSemana: 1
         });
         sinon.assert.calledWithMatch(queryStub, sinon.match.string, { id: 4, academiaId: 7 });
     });

@@ -19,7 +19,19 @@ describe('Owner dashboard routes', () => {
     });
 
     it('lists planos for the owner academy', async () => {
-        const planos = [{ id: 5, nome: 'Premium', valor: 199.9, academiaId: 10 }];
+        const planos = [
+            {
+                id: 5,
+                nome: 'Premium',
+                valor: 199.9,
+                academiaId: 10,
+                descricao: 'Premium total',
+                maxAulasPorSemana: 0,
+                aulas: [
+                    { id: 21, nome: 'Funcional', descricao: 'Alta intensidade' }
+                ]
+            }
+        ];
         sinon.stub(planoService, 'listPlanos').resolves(planos);
 
         const response = await request(app).get('/owner/planos').set('Authorization', `Bearer ${token}`);

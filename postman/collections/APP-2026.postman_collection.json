@@ -194,6 +194,145 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Alterar senha",
+          "id": "3f2f9958-4c6b-4bfd-a1c3-2bf5f0c5f7ab",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{JWT_TOKEN}}",
+                "uuid": "b8b3f6c8-7de1-4c50-9f58-3d4c7c72d9e3"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "uuid": "a4c57c34-df5d-4bc1-8a96-3bce0f5f3d23"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"SenhaForte123!\",\n  \"newPassword\": \"NovaSenha123!\",\n  \"confirmPassword\": \"NovaSenha123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/auth/password",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "auth",
+                "password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Esqueci senha",
+          "id": "550b1e96-fb8d-40c5-92ec-d145f6adf1b2",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "uuid": "9b5e73c0-f326-4acc-8eb6-6dc0a7d11fc0"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"aluno@recreate.local\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/auth/forgot-password",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "auth",
+                "forgot-password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Validar token de reset",
+          "id": "677cdf90-4579-4ed3-9d4c-8578e2b6c4b9",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{API_URL}}/auth/reset-password/{{RESET_TOKEN}}",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "auth",
+                "reset-password",
+                "{{RESET_TOKEN}}"
+              ]
+            },
+            "description": "Defina {{RESET_TOKEN}} com o token enviado por e-mail antes de executar."
+          },
+          "response": []
+        },
+        {
+          "name": "Redefinir senha",
+          "id": "de9984dd-a1f5-4a9c-90b2-5e43c417e9f0",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "uuid": "f8d7c938-47b0-465b-ac0c-3e6b2f046e72"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{RESET_TOKEN}}\",\n  \"newPassword\": \"SenhaReset123!\",\n  \"confirmPassword\": \"SenhaReset123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{API_URL}}/auth/reset-password",
+              "host": [
+                "{{API_URL}}"
+              ],
+              "path": [
+                "auth",
+                "reset-password"
+              ]
+            }
+          },
+          "response": []
         }
       ],
       "id": "c22a23c1-df0d-4c25-a059-ae43d86edcb9"

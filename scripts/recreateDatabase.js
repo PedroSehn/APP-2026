@@ -1,7 +1,8 @@
 import path from 'path';
-import { readFile } from 'fs/promises';
+import { readFile, readdir } from 'fs/promises';
 import dotenv from 'dotenv';
 import sql from 'mssql';
+import passwordService from '../src/services/passwordService.js';
 
 dotenv.config();
 
@@ -30,7 +31,7 @@ const buildConfig = (database) => ({
     }
 });
 
-const schemaPath = path.join(process.cwd(), 'sql', 'schema.sql');
+const schemaDir = path.join(process.cwd(), 'sql');
 const targetDatabase = process.env.DB_NAME || 'padrao';
 
 const dropAndCreateDatabase = async () => {
@@ -56,10 +57,20 @@ const dropAndCreateDatabase = async () => {
 };
 
 const runSchema = async () => {
-    const schemaSql = await readFile(schemaPath, 'utf-8');
     const pool = await sql.connect(buildConfig(targetDatabase));
     try {
-        await pool.request().batch(schemaSql);
+        const files = (await readdir(schemaDir)).filter((file) => file.endsWith('.sql'));
+        const prioritized = files.includes('schema.sql')
+            ? ['schema.sql', ...files.filter((file) => file !== 'schema.sql').sort()]
+            : [...files.sort()];
+
+        for (const fileName of prioritized) {
+            const filePath = path.join(schemaDir, fileName);
+            const scriptSql = await readFile(filePath, 'utf-8');
+            await pool.request().batch(scriptSql);
+            console.log(`✅ Estrutura aplicada: ${fileName}`);
+        }
+
         console.log('✅ Estrutura SQL aplicada');
     } finally {
         await pool.close();
@@ -70,6 +81,7 @@ const formatDate = (date) => date.toISOString().split('T')[0];
 
 const seedDatabase = async (request, dbInstance) => {
     const password = process.env.RECREATE_DB_PASSWORD || 'SenhaForte123!';
+    const resetPasswordValue = process.env.RECREATE_RESET_PASSWORD || 'SenhaReset123!';
     const emails = {
         admin: process.env.RECREATE_ADMIN_EMAIL || 'admin@recreate.local',
         owner: process.env.RECREATE_OWNER_EMAIL || 'dono@recreate.local',
@@ -218,6 +230,39 @@ const seedDatabase = async (request, dbInstance) => {
         })
         .expect(201);
 
+    await request
+        .patch('/auth/password')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+            currentPassword: password,
+            newPassword: password,
+            confirmPassword: password
+        })
+        .expect(200);
+
+    await request
+        .post('/auth/forgot-password')
+        .send({ email: emails.aluno })
+        .expect(200);
+
+    const resetTokenData = await passwordService.requestPasswordReset(emails.aluno);
+    if (!resetTokenData?.token) {
+        throw new Error('Não foi possível gerar o token de redefinição');
+    }
+
+    await request
+        .get(`/auth/reset-password/${resetTokenData.token}`)
+        .expect(200);
+
+    await request
+        .post('/auth/reset-password')
+        .send({
+            token: resetTokenData.token,
+            newPassword: resetPasswordValue,
+            confirmPassword: resetPasswordValue
+        })
+        .expect(200);
+
     console.log('\n📦 Seed concluído com os seguintes dados:');
     console.log(`- Academia: ${academyPayload.nome} (id ${academiaId})`);
     console.log(`- Plano: ${plano.body.data.nome} (id ${plano.body.data.id})`);
@@ -231,7 +276,8 @@ const seedDatabase = async (request, dbInstance) => {
     console.log(`  Admin: ${emails.admin}/${password} → token ${adminToken}`);
     console.log(`  Dono: ${emails.owner}/${password} → token ${ownerToken}`);
     console.log(`  Funcionario: ${emails.funcionario}/${password} → token ${funcionarioToken}`);
-    console.log(`  Aluno: ${emails.aluno}/${password} → token ${alunoToken}`);
+    console.log(`  Aluno: ${emails.aluno}/${resetPasswordValue} → token ${alunoToken}`);
+    console.log(`\n🔁 Fluxo de redefinição validado para ${emails.aluno}`);
     console.log(`\nAtive o header Authorization: Bearer <token> ao testar as rotas.`);
 };
 

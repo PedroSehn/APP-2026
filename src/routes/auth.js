@@ -1,10 +1,11 @@
 import express from 'express';
-import { body, validationResult } from 'express-validator';
+import { body, validationResult, param } from 'express-validator';
 import jwt from 'jsonwebtoken';
 import userService from '../services/userService.js';
 import refreshTokenService from '../services/refreshTokenService.js';
 import academiaService from '../services/academiaService.js';
 import { authenticate, requireRole } from '../middleware/auth.js';
+import passwordService from '../services/passwordService.js';
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -31,6 +32,27 @@ const responsePayload = (user, token, refreshData) => ({
     refreshTokenExpiresInDays: refreshData.expiresInDays ?? REFRESH_TOKEN_EXPIRES_IN_DAYS,
     user
 });
+
+const passwordRules = [
+    body('newPassword')
+        .isLength({ min: 8 })
+        .withMessage('A nova senha precisa ter pelo menos 8 caracteres')
+        .matches(/[A-Z]/)
+        .withMessage('A nova senha precisa conter ao menos uma letra maiúscula')
+        .matches(/\d/)
+        .withMessage('A nova senha precisa conter ao menos um número'),
+    body('confirmPassword')
+        .custom((value, { req }) => value === req.body.newPassword)
+        .withMessage('A confirmação deve ser igual à nova senha')
+];
+
+const respondBusinessError = (res, error) => {
+    if (error?.status && error?.message) {
+        res.status(error.status).json({ success: false, message: error.message });
+        return true;
+    }
+    return false;
+};
 
 router.post(
     '/login',
@@ -168,6 +190,105 @@ router.post(
             await refreshTokenService.deleteRefreshToken(req.body.refreshToken);
             return res.sendStatus(204);
         } catch (error) {
+            next(error);
+        }
+    }
+);
+
+router.patch(
+    '/password',
+    authenticate,
+    [
+    body('currentPassword')
+        .isString()
+        .trim()
+        .notEmpty()
+        .withMessage('A senha atual é obrigatória'),
+        ...passwordRules
+    ],
+    async (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        const { currentPassword, newPassword } = req.body;
+        try {
+            await passwordService.changePassword(req.user.id, currentPassword, newPassword);
+            return res.json({ success: true, message: 'Senha alterada com sucesso' });
+        } catch (error) {
+            if (respondBusinessError(res, error)) {
+                return;
+            }
+            next(error);
+        }
+    }
+);
+
+router.post(
+    '/forgot-password',
+    [body('email').isEmail().normalizeEmail()],
+    async (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        try {
+            const tokenData = await passwordService.requestPasswordReset(req.body.email);
+            if (tokenData?.token) {
+                // TODO: injetar emailService.sendResetEmail(tokenData.email, tokenData.token);
+            }
+            return res.json({
+                success: true,
+                message: 'Se houver uma conta vinculada ao e-mail, enviaremos instruções para redefinir a senha'
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+);
+
+router.get(
+    '/reset-password/:token',
+    [param('token').isString().trim().notEmpty()],
+    async (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        try {
+            await passwordService.validateResetToken(req.params.token);
+            return res.json({ success: true, message: 'Token válido' });
+        } catch (error) {
+            if (respondBusinessError(res, error)) {
+                return;
+            }
+            next(error);
+        }
+    }
+);
+
+router.post(
+    '/reset-password',
+    [
+        body('token').isString().trim().notEmpty(),
+        ...passwordRules
+    ],
+    async (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        try {
+            await passwordService.resetPassword(req.body.token, req.body.newPassword);
+            return res.json({ success: true, message: 'Senha redefinida com sucesso' });
+        } catch (error) {
+            if (respondBusinessError(res, error)) {
+                return;
+            }
             next(error);
         }
     }

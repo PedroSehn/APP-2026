@@ -49,7 +49,10 @@ router.post(
         body('nome').trim().notEmpty(),
         body('valor').isFloat({ min: 0 }),
         body('descricao').optional().trim(),
-        body('maxAulasPorSemana').optional().isInt({ min: 0 })
+        body('maxAulasPorSemana').optional().isInt({ min: 0 }),
+        body('duracaoMeses').optional().isInt(),
+        body('duracaoMeses').optional().isIn([1, 3, 6, 12]),
+        body('recorrente').optional().isBoolean()
     ],
     async (req, res, next) => {
         const validationError = handleValidationErrors(req, res);
@@ -57,14 +60,16 @@ router.post(
             return validationError;
         }
 
-        const { nome, valor, descricao, maxAulasPorSemana } = req.body;
+        const { nome, valor, descricao, maxAulasPorSemana, duracaoMeses, recorrente } = req.body;
         try {
             const plano = await planoService.createPlano({
                 academiaId: req.user.academiaId,
                 nome,
                 valor,
                 descricao: descricao || null,
-                maxAulasPorSemana: typeof maxAulasPorSemana !== 'undefined' ? maxAulasPorSemana : 0
+                maxAulasPorSemana: typeof maxAulasPorSemana !== 'undefined' ? maxAulasPorSemana : 0,
+                duracaoMeses: typeof duracaoMeses !== 'undefined' ? duracaoMeses : 1,
+                recorrente: typeof recorrente !== 'undefined' ? recorrente : true
             });
             return res.status(201).json({ success: true, data: plano });
         } catch (error) {

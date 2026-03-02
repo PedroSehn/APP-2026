@@ -1,5 +1,21 @@
 import db from '../config/db.js';
 
+const VALID_DURATIONS = [1, 3, 6, 12];
+
+const throwInvalidDuration = () => {
+    const error = new Error(`Duração inválida. Use ${VALID_DURATIONS.join(', ')}`);
+    error.code = 'PLANO_INVALID_DURATION';
+    throw error;
+};
+
+const validateDuration = (value) => {
+    const duration = Number(value);
+    if (!VALID_DURATIONS.includes(duration)) {
+        throwInvalidDuration();
+    }
+    return duration;
+};
+
 const throwIfNotFound = (rows) => {
     if (!rows.length) {
         const error = new Error('Plano não encontrado');
@@ -46,8 +62,17 @@ const mapPlanoRecord = (record) => ({
     nome: record.nome,
     valor: Number(record.valor),
     descricao: record.descricao,
-    maxAulasPorSemana: record.max_aulas_por_semana
+    maxAulasPorSemana: record.max_aulas_por_semana,
+    duracaoMeses: record.duracao_meses,
+    recorrente: Boolean(record.recorrente)
 });
+
+const normalizeRecorrente = (value) => {
+    if (typeof value === 'undefined') {
+        return 1;
+    }
+    return value ? 1 : 0;
+};
 
 const listPlanos = async (academiaId) => {
     const rows = await db.query(
@@ -59,6 +84,8 @@ const listPlanos = async (academiaId) => {
                 p.valor,
                 p.descricao,
                 p.max_aulas_por_semana,
+                p.duracao_meses,
+                p.recorrente,
                 a.id AS aula_id,
                 a.nome AS aula_nome,
                 a.descricao AS aula_descricao
@@ -82,6 +109,8 @@ const listPlanos = async (academiaId) => {
                 valor: Number(record.valor),
                 descricao: record.descricao,
                 maxAulasPorSemana: record.max_aulas_por_semana,
+                duracaoMeses: record.duracao_meses,
+                recorrente: Boolean(record.recorrente),
                 aulas: []
             });
         }
@@ -101,7 +130,7 @@ const listPlanos = async (academiaId) => {
 const getPlanoById = async (id, academiaId) => {
     const rows = await db.query(
         `
-            SELECT id, academia_id, nome, valor, descricao, max_aulas_por_semana
+            SELECT id, academia_id, nome, valor, descricao, max_aulas_por_semana, duracao_meses, recorrente
             FROM Planos
             WHERE id = @id AND academia_id = @academiaId
         `,
@@ -111,20 +140,32 @@ const getPlanoById = async (id, academiaId) => {
     return mapPlanoRecord(rows[0]);
 };
 
-const createPlano = async ({ academiaId, nome, valor, descricao, maxAulasPorSemana = 0 }) => {
+const createPlano = async ({
+    academiaId,
+    nome,
+    valor,
+    descricao,
+    maxAulasPorSemana = 0,
+    duracaoMeses = 1,
+    recorrente = true
+}) => {
     try {
+        const duration = validateDuration(duracaoMeses);
+        const recurrenceFlag = normalizeRecorrente(recorrente);
         const rows = await db.query(
             `
-                INSERT INTO Planos (academia_id, nome, valor, descricao, max_aulas_por_semana)
+                INSERT INTO Planos (academia_id, nome, valor, descricao, max_aulas_por_semana, duracao_meses, recorrente)
                 OUTPUT INSERTED.*
-                VALUES (@academiaId, @nome, @valor, @descricao, @maxAulasPorSemana)
+                VALUES (@academiaId, @nome, @valor, @descricao, @maxAulasPorSemana, @duracaoMeses, @recorrente)
             `,
             {
                 academiaId,
                 nome,
                 valor,
                 descricao,
-                maxAulasPorSemana
+                maxAulasPorSemana,
+                duracaoMeses: duration,
+                recorrente: recurrenceFlag
             }
         );
         return mapPlanoRecord(rows[0]);
@@ -152,6 +193,14 @@ const updatePlano = async (id, academiaId, patch) => {
     if (Object.prototype.hasOwnProperty.call(patch, 'maxAulasPorSemana')) {
         updates.push('max_aulas_por_semana = @maxAulasPorSemana');
         params.maxAulasPorSemana = patch.maxAulasPorSemana;
+    }
+    if (Object.prototype.hasOwnProperty.call(patch, 'duracaoMeses')) {
+        updates.push('duracao_meses = @duracaoMeses');
+        params.duracaoMeses = validateDuration(patch.duracaoMeses);
+    }
+    if (Object.prototype.hasOwnProperty.call(patch, 'recorrente')) {
+        updates.push('recorrente = @recorrente');
+        params.recorrente = normalizeRecorrente(patch.recorrente);
     }
 
     if (!updates.length) {

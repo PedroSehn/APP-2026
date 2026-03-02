@@ -49,6 +49,7 @@ Defina em um `.env`:
 ### Painel do dono (`/owner`)
 - Montado em `app.use('/owner', authenticate, requireRole('dono'), ownerDashboardRouter)` e disponível apenas para usuários com `role = 'dono'`.
 - `GET /owner/planos` retorna os planos da academia do dono (`req.user.academiaId`) em `{ success, count, data }`.
+- Cada plano no retorno inclui `maxAulasPorSemana` e um array `aulas` com `{ id, nome, descricao }`, permitindo entender quais aulas aquele plano permite. As vezes também expõe `descricao` e `valor` para contextualizar a oferta.
 - `POST /owner/planos` cria um novo plano (`nome`, `valor`, `descricao?`) e dispara `409` caso já exista um plano com o mesmo nome na academia.
 - `GET /owner/dashboard/pending-subscriptions` lista assinaturas pendentes e vencidas por padrão (limit 25, offset 0, max 100) e aceita `limit/offset` como query params para paginação; cada item inclui fatura, assinatura, plano e aluno relacionados.
 - `GET /owner/dashboard/faturas` permite filtrar por `status`, `month`, `year`, `limit`, `offset` para revisar cobranças e traz metadados da assinatura/aluno.

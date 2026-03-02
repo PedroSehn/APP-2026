@@ -30,6 +30,11 @@ CREATE TABLE PlanoAulas (
     CONSTRAINT UX_PlanoAulas_PlanoAula UNIQUE (plano_id, aula_id)
 );
 
+-- A tabela PlanoAulas conecta cada plano às aulas que ele permite acessar.
+-- O endpoint `/owner/planos` e o serviço correspondente agregam essas relações
+-- para devolver um array `aulas` com `{ id, nome, descricao }` por plano, além
+-- das propriedades `valor`, `descricao` e `max_aulas_por_semana`.
+
 CREATE TABLE Planos (
     id INT IDENTITY(1,1) PRIMARY KEY,
     academia_id INT NULL,

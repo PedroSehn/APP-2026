@@ -25,7 +25,7 @@ const handleServiceError = (error, res, next) => {
         return res.status(409).json({ message: error.message });
     }
 
-    if (error.code === 'ALUNO_NO_UPDATES' || error.code === 'ALUNO_INVALID_PASSWORD') {
+    if (error.code === 'ALUNO_NO_UPDATES') {
         return res.status(400).json({ message: error.message });
     }
 
@@ -46,7 +46,6 @@ router.put(
     [
         body('name').optional().trim().notEmpty(),
         body('email').optional().isEmail().normalizeEmail(),
-        body('password').optional().isLength({ min: 6 })
     ],
     async (req, res, next) => {
         const validationError = handleValidationErrors(req, res);
@@ -55,7 +54,7 @@ router.put(
         }
 
         const patch = {};
-        ['name', 'email', 'password'].forEach((field) => {
+        ['name', 'email'].forEach((field) => {
             if (req.body[field]) {
                 patch[field] = req.body[field];
             }

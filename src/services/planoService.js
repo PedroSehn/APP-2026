@@ -362,11 +362,13 @@ const planoService = {
 };
 
 export {
+    ensurePlanoBelongsToAcademia,
     ensurePlanoPermiteAula,
     listPlanoAulas,
     addAulaToPlano,
     removeAulaFromPlano,
-    reassignAlunoPlano
+    reassignAlunoPlano,
+    getPlanoById
 };
 
 export default planoService;

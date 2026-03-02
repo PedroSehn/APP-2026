@@ -174,6 +174,7 @@ const seedDatabase = async (request, dbInstance) => {
         })
         .expect(201);
 
+    const assinaturaInsertDate = new Date();
     const [assinaturaInserted] = await dbInstance.query(
         `
             INSERT INTO Assinaturas (aluno_id, plano_id, data_inicio, status)
@@ -183,7 +184,20 @@ const seedDatabase = async (request, dbInstance) => {
         {
             alunoId,
             planoId: plano.body.data.id,
-            dataInicio: new Date()
+            dataInicio: assinaturaInsertDate
+        }
+    );
+    const faturaDueDate = formatDate(assinaturaInsertDate);
+    const [faturaInserted] = await dbInstance.query(
+        `
+            INSERT INTO Faturas (assinatura_id, valor, data_vencimento, data_pagamento, status)
+            OUTPUT INSERTED.*
+            VALUES (@assinaturaId, @valor, @dataVencimento, NULL, 'PENDENTE')
+        `,
+        {
+            assinaturaId: assinaturaInserted.id,
+            valor: plano.body.data.valor,
+            dataVencimento: faturaDueDate
         }
     );
 
@@ -206,6 +220,7 @@ const seedDatabase = async (request, dbInstance) => {
     console.log(`- Aula: ${aula.body.data.nome} (id ${aula.body.data.id})`);
     console.log(`- Horário: ${horario.body.data.id} (${horario.body.data.horaInicio}-${horario.body.data.horaFim})`);
     console.log(`- Assinatura: ${assinaturaInserted?.id}`);
+    console.log(`- Fatura: ${faturaInserted?.id}`);
     console.log(`- Presença: ${presenca.body.data.id} para ${dataAula}`);
 
     console.log('\n🔐 Credenciais para Postman:');

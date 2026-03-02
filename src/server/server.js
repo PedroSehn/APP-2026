@@ -12,6 +12,9 @@ import horariosRouter from '../routes/horarios.js';
 import presencasRouter from '../routes/presencas.js';
 import planoPermissoesRouter from '../routes/planoPermissoes.js';
 import planosRouter from '../routes/planos.js';
+import assinaturasRouter from '../routes/assinaturas.js';
+import ownerFaturasRouter from '../routes/ownerFaturas.js';
+import faturasRouter from '../routes/faturas.js';
 import { authenticate, requireRole } from '../middleware/auth.js';
 
 dotenv.config();
@@ -29,6 +32,9 @@ app.use('/planos', authenticate, planosRouter);
 app.use('/aulas', authenticate, requireRole(['admin', 'dono']), aulasRouter);
 app.use('/horarios', authenticate, horariosRouter);
 app.use('/presencas', authenticate, presencasRouter);
+app.use('/assinaturas', authenticate, assinaturasRouter);
+app.use('/owner/faturas', authenticate, requireRole(['admin', 'dono']), ownerFaturasRouter);
+app.use('/faturas', authenticate, faturasRouter);
 
 
 // Função para iniciar o servidor

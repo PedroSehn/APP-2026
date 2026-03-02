@@ -31,6 +31,7 @@ Defina em um `.env`:
 - `POST /auth/register` – registra usuário (nome, email, password, role opcional, academiaId opcional). Donos precisam informar uma academia e recebem `Academias.owner_id` associado automaticamente.
 - `POST /auth/login` – valida credenciais e retorna `{ token, expiresIn, user }`.
 - `GET /academias` – protegido; exige token JWT válido e role `admin` para listar academias. As listas incluem `owner_id`, enquanto rotas com controle de dono verificam `role = 'dono'` e `Academias.owner_id` para garantir que apenas o proprietário manipule seus dados.
+- `POST /assinaturas` – protegido; só `admin` e `dono` podem abrir novas assinaturas (`alunoId`, `planoId`, `dataInicio` obrigatórios). O serviço garante que o aluno/plano pertencem à mesma academia, que não haja outra assinatura `ATIVA` para o aluno, normaliza os status para letras maiúsculas e cria automaticamente a primeira `Faturas` usando o valor do plano (`status` padrão `ATIVA`, `faturaStatus` padrão `PENDENTE`, `dataVencimento = dataInicio` ou override informado).
 - `/alunos` – GET/GET por ID pode ser dirigido tanto por `dono` quanto por `funcionario` para revisar alunos atrelados à academia do mesmo `academiaId`. POST/PUT/DELETE continuam restritos ao `dono`.
 - `/aulas` – CRUD protegido por JWT e `requireRole(['admin', 'dono'])`. `GET /aulas` e `GET /aulas/:id` consultam apenas aulas da academia do token, enquanto `POST`, `PUT` e `DELETE` aceitam `nome` obrigatório e `descricao` opcional para criar/atualizar registros do mesmo `academiaId`.
 - `GET /health` – rota pública para verificar saúde da API.
@@ -53,6 +54,9 @@ Defina em um `.env`:
 - `POST /owner/planos` cria um novo plano (`nome`, `valor`, `descricao?`) e dispara `409` caso já exista um plano com o mesmo nome na academia.
 - `GET /owner/dashboard/pending-subscriptions` lista assinaturas pendentes e vencidas por padrão (limit 25, offset 0, max 100) e aceita `limit/offset` como query params para paginação; cada item inclui fatura, assinatura, plano e aluno relacionados.
 - `GET /owner/dashboard/faturas` permite filtrar por `status`, `month`, `year`, `limit`, `offset` para revisar cobranças e traz metadados da assinatura/aluno.
+- `GET /owner/faturas` oferece filtros idênticos (`status`, `month`, `year`, `limit`, `offset`) para donos/admins listarem faturas de toda a academia; reutiliza `dashboardService.listInvoices`.
+- `PATCH /owner/faturas/:id` atualiza `status` (e.g. `PAGO`, `CANCELADA`) e `dataPagamento` para faturas da academia, retornando o registro atualizado.
+- `GET /faturas` permite que cada `aluno` autenticado veja suas próprias cobranças (`status`, `month`, `year`, `limit`, `offset` são opcionais) e garante que apenas faturas da academia do aluno sejam retornadas.
 - `GET /owner/dashboard/financas` retorna a previsão de receita mensal por ano opcional (`year`), com totais agrupados por mês.
 - Todos os endpoints do painel reutilizam `planoService` e `dashboardService` para manter as queries isoladas em `src/services`.
 

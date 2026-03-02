@@ -37,6 +37,9 @@ Defina em um `.env`:
 - `GET /alunos/me` – permite que o próprio `aluno` autenticado consulte seus dados (`nome`, `email`, `role`, `academiaId`) validados contra o schema `Usuarios` (`nome`, `email`, `password_hash`, `academia_id`) e vinculados ao `academia_id` do token.
 - `PUT /alunos/me` – aceita apenas `nome` e `email` (para manter o `password_hash` isolado no schema) e retorna erro se o campo `password` for enviado; alterações de senha seguem o fluxo dedicado de autenticação nos endpoints de `auth` (ex.: um `PUT /auth/password` separado).
 - `/aulas` – CRUD protegido por JWT e `requireRole(['admin', 'dono'])`. `GET /aulas` e `GET /aulas/:id` consultam apenas aulas da academia do token, enquanto `POST`, `PUT` e `DELETE` aceitam `nome` obrigatório e `descricao` opcional para criar/atualizar registros do mesmo `academiaId`.
+- `PATCH /auth/password` – para usuários autenticados mudarem a senha atual fornecendo `currentPassword`, `newPassword` e `confirmPassword`; valida `currentPassword` via `bcrypt.compare` e o novo valor deve ter ao menos 8 caracteres, uma letra maiúscula e um número.
+- `POST /auth/forgot-password` – público, recebe `email`, gera um token único com `crypto.randomBytes` e retorna uma mensagem genérica (sem confirmar se o email existe); a tabela `sqlPasswordResetTokens` guarda apenas o `SHA-256` do token, expiração e uso único.
+- `GET /auth/reset-password/:token` e `POST /auth/reset-password` – endereços públicos para validar um token ainda válido e completar a redefinição; o token enviado no corpo é sempre transformado em hash antes de ser comparado ao banco.
 - `GET /health` – rota pública para verificar saúde da API.
 
 ### Fluxo de autenticação
